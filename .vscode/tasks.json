@@ -64,18 +64,6 @@
       "command": "host start",
       "isBackground": true,
       "problemMatcher": "$func-dotnet-watch"
-    },
-    {
-      "type": "shell",
-      "label": "Generate apiDoc documentation",
-      "command": "apidoc",
-      "args": [
-        "-i",
-        "${workspaceFolder}/src",
-        "-o",
-        "${workspaceFolder}/doc"
-      ],
-      "problemMatcher": []
     }
   ]
 }

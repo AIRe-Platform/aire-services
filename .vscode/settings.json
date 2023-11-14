@@ -5,6 +5,4 @@
   "debug.internalConsoleOptions": "neverOpen",
   "azureFunctions.preDeployTask": "publish (functions)",
   "cmake.configureOnOpen": false,
-  "dotnet.codeLens.enableReferencesCodeLens": false,
-  "editor.codeLens": false
 }

@@ -263,5 +263,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-# Azurite i
-__azurite_db_table__.json
+# Azurite
+__azurite*__.json
+/__blobstorage__
