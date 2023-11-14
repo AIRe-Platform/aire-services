@@ -40,10 +40,14 @@ namespace Aire.Servces.Api.Admin
                     using var stream = new StreamReader(req.Body);
                     var configData = await stream.ReadToEndAsync();
                     config = configData.JsonToObject<PlatformConfiguration>();
+
+                    if(config == null)
+                        return new BadRequestResult();
                 }
                 catch(Exception ex)
                 {
                     _log.LogError(ex, "Failed to read request body");
+                    return new BadRequestResult();
                 }
             }
 
