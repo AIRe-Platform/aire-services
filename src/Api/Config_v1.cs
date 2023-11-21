@@ -25,8 +25,11 @@ namespace Aire.Services.Api
         }
 
         [FunctionName(nameof(GetConfig))]
-        [OpenApiOperation(operationId: "Config", Description = "Returns platform configuration object")]
-        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+        [OpenApiOperation(
+            operationId: "Config", 
+            tags: new[] { "Configuration" },
+            Description = "Returns platform configuration object")]
+        //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
         [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Occurs when the platform is not configured")]
         public async Task<IActionResult> GetConfig(

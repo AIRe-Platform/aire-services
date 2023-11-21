@@ -33,22 +33,22 @@ namespace Aire.Servces.Api.Admin
             var pk = AireEnvironment.PlatformConfiguration;
             var rk = AireConstants.PlatformConfigRowKey;
 
-            if(req.Body != null)
+            try
             {
-                try
+                using var stream = new StreamReader(req.Body);
+                var configData = await stream.ReadToEndAsync();
+                if(configData.Length > 0)
                 {
-                    using var stream = new StreamReader(req.Body);
-                    var configData = await stream.ReadToEndAsync();
                     config = configData.JsonToObject<PlatformConfiguration>();
 
                     if(config == null)
                         return new BadRequestResult();
                 }
-                catch(Exception ex)
-                {
-                    _log.LogError(ex, "Failed to read request body");
-                    return new BadRequestResult();
-                }
+            }
+            catch(Exception ex)
+            {
+                _log.LogError(ex, "Failed to read request body");
+                return new BadRequestResult();
             }
 
             if(config == null)
@@ -93,8 +93,8 @@ namespace Aire.Servces.Api.Admin
                                 ModuleType.AI,
                                 new Module {
                                     Access = ModuleAccess.Public,
-                                    Endpoint = AireEnvironment.MemoryModuleEndpoint,
-                                    Type = ModuleType.Memory
+                                    Endpoint = AireEnvironment.AIModuleEndpoint,
+                                    Type = ModuleType.AI
                                 }
                             }
                         }

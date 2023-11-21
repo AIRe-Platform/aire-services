@@ -5,4 +5,5 @@
   "debug.internalConsoleOptions": "neverOpen",
   "azureFunctions.preDeployTask": "publish (functions)",
   "cmake.configureOnOpen": false,
+  "editor.codeLens": true
 }
