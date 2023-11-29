@@ -25,6 +25,11 @@ namespace Aire.Services.Models
         [EnumMember(Value = "public")]
         Public,
 
+        // Public modules that require service-to-service authentication
+        // These cannot be accessed by public clients
+        [EnumMember(Value = "service")]
+        Service,
+
         // Private modules require that users connect with third-party ID providers
         // These modules can be used to store user data
         [EnumMember(Value = "private")]
@@ -41,5 +46,8 @@ namespace Aire.Services.Models
 
         [JsonProperty("access")]
         public ModuleAccess Access { get; set; }
+
+        [JsonProperty("credentials", NullValueHandling = NullValueHandling.Ignore)]
+        public ClientCredentials Credentials { get; set; } = null;
     }
 }
