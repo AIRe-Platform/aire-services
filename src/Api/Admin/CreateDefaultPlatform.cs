@@ -3,14 +3,14 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Aire.Helpers;
 using Aire.Services.Models;
 using System.Web.Http;
 using Aire.Services;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 
 namespace Aire.Servces.Api.Admin
 {
@@ -25,7 +25,8 @@ namespace Aire.Servces.Api.Admin
             _storage = storage;
         }
 
-        [FunctionName("CreateDefaultPlatform")]
+        [Function("CreateDefaultPlatform")]
+        [OpenApiIgnore]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = null)] HttpRequest req)
         {

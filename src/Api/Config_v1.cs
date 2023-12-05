@@ -3,13 +3,12 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.Azure.Functions.Worker;
 using Aire.Helpers;
 using Aire.Services.Models;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 
 namespace Aire.Services.Api
 {
@@ -24,7 +23,7 @@ namespace Aire.Services.Api
             _storage = storage;
         }
 
-        [FunctionName(nameof(GetConfig))]
+        [Function("GetConfig_v1")]
         [OpenApiOperation(
             operationId: "GetConfig", 
             tags: new[] { "Configuration" },
@@ -58,7 +57,7 @@ namespace Aire.Services.Api
             return new OkObjectResult(config);
         }
 
-        [FunctionName(nameof(GetConfigInternal))]
+        [Function("GetConfigInternal_v1")]
         [OpenApiOperation(
             operationId: "GetConfigInternal", 
             tags: new[] { "Configuration" },

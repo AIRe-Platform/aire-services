@@ -22,11 +22,12 @@ You should create `local.settings.json` in the root of the repository when devel
   "Values": {
     "AzureWebJobsStorage": "",
     "StorageConnectionString": "<Connection string for Table storage or storage emulator>",
-    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "PLATFORM_CONFIGURATION": "default",
+    "OpenApi__HostNames": "http://localhost:7071/api/"
     "ID_MODULE_ENDPOINT": "http://localhost:7072/api",
     "MEMORY_MODULE_ENDPOINT": "http://localhost:7073/api",
     "AI_MODULE_ENDPOINT": "http://localhost:7074/api",
-    "PLATFORM_CONFIGURATION": "default"
   },
   "Host": {
     "LocalHttpPort": 7071,
