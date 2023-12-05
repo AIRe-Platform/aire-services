@@ -1,16 +1,36 @@
 ﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Azure.Functions.Worker.Extensions.OpenApi;
+using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using Microsoft.OpenApi.Models;
 using Aire.Services;
 using Aire.Helpers;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(worker => worker.UseNewtonsoftJson())
-    .ConfigureOpenApi()
+    .ConfigureFunctionsWebApplication(worker => worker.UseNewtonsoftJson())
     .ConfigureServices(services => {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.AddSingleton<ITableStorageService, TableStorageService>();
+
+        services.AddSingleton<IOpenApiConfigurationOptions>(_ => {
+            var options = new OpenApiConfigurationOptions {
+                Info = new OpenApiInfo {
+                    Version = "0.1.0",
+                    Title = "AIRe Services Module",
+                    Description = "This is the reference implementation of AIRe Platform Services module."
+                },
+                Servers = DefaultOpenApiConfigurationOptions.GetHostNames(),
+                OpenApiVersion = OpenApiVersionType.V3,
+                IncludeRequestingHostName = true,
+                ForceHttp = false,
+                ForceHttps = false,
+            };
+            return options;
+        });
+
         services.ConfigureFunctionsApplicationInsights();
     })
     .Build();
