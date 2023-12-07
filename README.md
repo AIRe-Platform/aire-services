@@ -23,11 +23,10 @@ You should create `local.settings.json` in the root of the repository when devel
     "AzureWebJobsStorage": "",
     "StorageConnectionString": "<Connection string for Table storage or storage emulator>",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "PLATFORM_CONFIGURATION": "default",
+    "PlatformConfiguration": "default",
+    "TokenSigningKey": "<signing key shared between platform modules>",
+    "TokenEncryptionKey": "<enryption key shared between platform modules>",
     "OpenApi__HostNames": "http://localhost:7071/api/"
-    "ID_MODULE_ENDPOINT": "http://localhost:7072/api",
-    "MEMORY_MODULE_ENDPOINT": "http://localhost:7073/api",
-    "AI_MODULE_ENDPOINT": "http://localhost:7074/api",
   },
   "Host": {
     "LocalHttpPort": 7071,
@@ -41,8 +40,12 @@ The `test/CreateDefaultPlatform.http` file contains an example request for setti
 
 ## Deployment
 
-Publish the Functions app and then setup the following required environment values:
+Publish the Fuctions app and then setup the following required environment values:
 
-- Default platform configuration name: `PLATFORM_CONFIGURATION`
-- Storage connection string: `StorageConnectionString` (note: probably the same as your `AzureWebJobsStorage`)
-- Endpoints: `ID_MODULE_ENDPOINT`, `MEMORY_MODULE_ENDPOINT`, `AI_MODULE_ENDPOINT`
+- `PlatformConfiguration` The name of the platform configuration to use. Default: `default`
+- `TokenSigningKey` The token signing key shared between the platform instance modules.
+- `TokenEncryptionKey` The token encryption key shared between the platform instance modules.
+
+## Disclaimer
+
+This README is a work-in-progress. The information above may be out-dated or incorrect.
