@@ -8,12 +8,19 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.OpenApi.Models;
 using Aire.Services;
 using Aire.Helpers;
+using Newtonsoft.Json;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication(worker => worker.UseNewtonsoftJson())
+    .ConfigureFunctionsWebApplication(worker => {
+        worker.UseNewtonsoftJson();
+    })
     .ConfigureServices(services => {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.AddSingleton<ITableStorageService, TableStorageService>();
+
+        services.AddMvcCore().AddNewtonsoftJson(options => {
+            options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        });
 
         services.AddSingleton<IOpenApiConfigurationOptions>(_ => {
             var options = new OpenApiConfigurationOptions {
