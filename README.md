@@ -38,6 +38,14 @@ You should create `local.settings.json` in the root of the repository when devel
 
 The `test/CreateDefaultPlatform.http` file contains an example request for setting up default platform configuration. You can run the request directly from VS Code if you have the extension `humao.rest-client` installed.
 
+## API Documentation
+
+Visit path `/api/swagger/ui` to inspect. If running in localhost, there's an issue where the configuration file URL gets an invalid port.
+
+Simply change in the correct port in the top bar to work around the issue.
+
+Example: If the module is running on port `7071` change the URL to `http://localhost:7071/api/swagger.json`.
+
 ## Deployment
 
 Publish the Fuctions app and then setup the following required environment values:
