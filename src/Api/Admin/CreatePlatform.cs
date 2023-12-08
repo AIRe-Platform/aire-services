@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -30,7 +27,7 @@ namespace Aire.Servces.Api.Admin
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "platform/{platform_name}")] HttpRequest req,
             string platform_name)
         {
-            PlatformConfiguration config = null;
+            PlatformConfiguration? config = null;
             var pk = platform_name;
             var rk = AireConstants.PlatformConfigRowKey;
 

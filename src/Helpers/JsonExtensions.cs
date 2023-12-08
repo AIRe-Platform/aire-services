@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Aire.Helpers
 {
@@ -7,12 +6,12 @@ namespace Aire.Helpers
     {
         public static JsonSerializerSettings Settings { get; set; } = new()
         {
-			Error = delegate (object sender, ErrorEventArgs args) {
+			Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) {
 				args.ErrorContext.Handled = true;
 			}
 		};
 
-        public static T JsonToObject<T>(this string jsonString)
+        public static T? JsonToObject<T>(this string jsonString)
         {
             return JsonConvert.DeserializeObject<T>(jsonString, Settings);
         }

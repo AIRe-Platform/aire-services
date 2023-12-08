@@ -8,7 +8,7 @@ namespace Aire.Helpers
 {
     public interface ITableStorageService 
     {
-        Task<T> RetrieveAsync<T>(string partitionKey, string rowKey) 
+        Task<T?> RetrieveAsync<T>(string partitionKey, string rowKey) 
             where T: class, ITableEntity, new();
 
         Task<bool> UpsertAsync<T>(T entity)

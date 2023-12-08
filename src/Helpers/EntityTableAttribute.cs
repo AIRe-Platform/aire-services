@@ -1,5 +1,3 @@
-using System;
-
 namespace Aire.Helpers
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]

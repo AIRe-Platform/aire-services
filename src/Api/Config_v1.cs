@@ -1,6 +1,4 @@
 using System.Net;
-using System.Threading.Tasks;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -35,7 +33,7 @@ namespace Aire.Services.Api
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config")] HttpRequest req)
         {
             var entity = await _storage.RetrieveAsync<PlatformEntity>(
-                AireEnvironment.PlatformConfiguration, 
+                AireEnvironment.PlatformConfiguration!, 
                 AireConstants.PlatformConfigRowKey);
             
             if(entity == null)
@@ -47,9 +45,9 @@ namespace Aire.Services.Api
             var config = entity.Config;
 
             // Remove services that require service-to-service authentication
-            foreach(var svc in config.Services)
+            foreach(var svc in config!.Services!)
             {
-                svc.Modules = svc.Modules
+                svc.Modules = svc.Modules!
                     .Where(x => x.Access != ModuleAccess.Service)
                     .ToList();
             }
@@ -69,7 +67,7 @@ namespace Aire.Services.Api
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "v1/config/internal")] HttpRequest req)
         {
             var entity = await _storage.RetrieveAsync<PlatformEntity>(
-                AireEnvironment.PlatformConfiguration, 
+                AireEnvironment.PlatformConfiguration!, 
                 AireConstants.PlatformConfigRowKey);
             
             if(entity == null)

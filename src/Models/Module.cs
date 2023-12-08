@@ -42,12 +42,12 @@ namespace Aire.Services.Models
         public ModuleType Type { get; set; }
 
         [JsonProperty("endpoint")]
-        public string Endpoint { get; set; }
+        public string? Endpoint { get; set; }
 
         [JsonProperty("access")]
         public ModuleAccess Access { get; set; }
 
         [JsonProperty("credentials", NullValueHandling = NullValueHandling.Ignore)]
-        public ClientCredentials Credentials { get; set; } = null;
+        public ClientCredentials? Credentials { get; set; } = null;
     }
 }

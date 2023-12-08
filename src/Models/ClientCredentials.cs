@@ -5,9 +5,9 @@ namespace Aire.Services.Models
     public class ClientCredentials
     {
         [JsonProperty("client_id")]
-        public string ClientId { get; set; }
+        public string? ClientId { get; set; }
 
         [JsonProperty("client_secret")]
-        public string ClientSecret { get; set; }
+        public string? ClientSecret { get; set; }
     }
 }
