@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Microsoft.Azure.Functions.Worker;
-using Aire.Helpers;
+using Aire.Sdk.TableStorage;
 using Aire.Services.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 

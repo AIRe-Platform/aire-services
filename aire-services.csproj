@@ -30,4 +30,14 @@
   <ItemGroup>
     <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="submodules\**" />
+    <Compile Remove="submodules\**" />
+    <EmbeddedResource Remove="submodules\**" />
+    <None Remove="submodules\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="submodules\aire-dotnet-sdk\Aire.Sdk.Helpers\Aire.Sdk.Helpers.csproj" />
+    <ProjectReference Include="submodules\aire-dotnet-sdk\Aire.Sdk.TableStorage\Aire.Sdk.TableStorage.csproj" />
+  </ItemGroup>
 </Project>

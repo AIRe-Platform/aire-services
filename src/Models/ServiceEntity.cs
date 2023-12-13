@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
-using Aire.Helpers;
+using Aire.Sdk.TableStorage;
+using Aire.Sdk.Helpers;
 
 namespace Aire.Services.Models
 {

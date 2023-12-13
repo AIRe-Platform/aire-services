@@ -6,9 +6,9 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.OpenApi.Models;
-using Aire.Services;
-using Aire.Helpers;
+using Aire.Sdk.TableStorage;
 using Newtonsoft.Json;
+using Aire.Services;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(worker => {
@@ -16,7 +16,12 @@ var host = new HostBuilder()
     })
     .ConfigureServices(services => {
         services.AddApplicationInsightsTelemetryWorkerService();
-        services.AddSingleton<ITableStorageService, TableStorageService>();
+
+        services
+            .AddSingleton<ITableStorageService, TableStorageService>()
+            .Configure<TableStorageConfiguration>(o => {
+                o.ConnectionString = AireEnvironment.StorageConnectionString;
+            });
 
         services.AddMvcCore().AddNewtonsoftJson(options => {
             options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
