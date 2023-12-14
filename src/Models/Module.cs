@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -38,16 +39,25 @@ namespace Aire.Services.Models
 
     public class Module
     {
-        [JsonProperty("type")]
+        [JsonProperty("type", Required = Required.Always)]
+        [OpenApiProperty(Description = "Type of the module")]
         public ModuleType Type { get; set; }
 
-        [JsonProperty("endpoint")]
+        [JsonProperty("endpoint", Required = Required.Always)]
+        [OpenApiProperty(Description = "Module endpoint root")]
         public string? Endpoint { get; set; }
 
-        [JsonProperty("access")]
+        [JsonProperty("access", Required = Required.Always)]
+        [OpenApiProperty(Description = """
+        Required access level.
+        Public modules do not generally require authentication.
+        Service modules can only be accessed from other modules with server-to-server authentication.
+        Private modules require the user to be logger in.
+        """)]
         public ModuleAccess Access { get; set; }
 
         [JsonProperty("credentials", NullValueHandling = NullValueHandling.Ignore)]
+        [OpenApiProperty(Description = "Server-to-server client credentials")]
         public ClientCredentials? Credentials { get; set; } = null;
     }
 }

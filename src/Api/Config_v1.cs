@@ -7,6 +7,8 @@ using Microsoft.Azure.Functions.Worker;
 using Aire.Sdk.TableStorage;
 using Aire.Services.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using System.Web.Http;
 
 namespace Aire.Services.Api
 {
@@ -26,9 +28,8 @@ namespace Aire.Services.Api
             operationId: "GetConfig", 
             tags: new[] { "Configuration" },
             Description = "Returns public platform configuration object")]
-        //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Occurs when the platform is not configured")]
+        [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfig(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config")] HttpRequest req)
         {
@@ -39,7 +40,7 @@ namespace Aire.Services.Api
             if(entity == null)
             {
                 _log.LogError("Default platform not configured!");
-                return new NotFoundResult();
+                return new InternalServerErrorResult();
             }
 
             var config = entity.Config;
@@ -60,9 +61,9 @@ namespace Aire.Services.Api
             operationId: "GetConfigInternal", 
             tags: new[] { "Configuration" },
             Description = "Returns internal platform configuration object")]
-        //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Occurs when the platform is not configured")]
+        [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfigInternal(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "v1/config/internal")] HttpRequest req)
         {
@@ -73,7 +74,7 @@ namespace Aire.Services.Api
             if(entity == null)
             {
                 _log.LogError("Default platform not configured!");
-                return new NotFoundResult();
+                return new InternalServerErrorResult();
             }
 
             return new OkObjectResult(entity.Config);
