@@ -25,9 +25,10 @@ namespace Aire.Services.Api
 
         [Function("GetConfig_v1")]
         [OpenApiOperation(
-            operationId: "GetConfig", 
-            tags: new[] { "Configuration" },
-            Description = "Returns public platform configuration object")]
+            operationId: "getConfig", 
+            tags: ["configuration"],
+            Summary = "Public platform configuration",
+            Description = "Returns public platform configuration object for public clients")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
         [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfig(
@@ -58,11 +59,18 @@ namespace Aire.Services.Api
 
         [Function("GetConfigInternal_v1")]
         [OpenApiOperation(
-            operationId: "GetConfigInternal", 
-            tags: new[] { "Configuration" },
-            Description = "Returns internal platform configuration object")]
-        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+            operationId: "getConfigInternal", 
+            tags: ["configuration"],
+            Summary = "Internal platform configuration",
+            Description = "Returns internal platform configuration object for internal services")]
+        [OpenApiSecurity(
+            schemeName: "AireServiceKey", 
+            schemeType: SecuritySchemeType.ApiKey, 
+            Name = "Aire-Service-Key", 
+            In = OpenApiSecurityLocationType.Header,
+            Description = "Internal platform module service key")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
+        [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Missing or invalidnservice key")]
         [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfigInternal(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "v1/config/internal")] HttpRequest req)
