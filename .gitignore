@@ -266,3 +266,4 @@ __pycache__/
 # Azurite
 __azurite*__.json
 /__blobstorage__
+/__queuestorage__
