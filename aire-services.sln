@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aire-dotnet-sdk", "aire-dot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Helpers", "submodules\aire-dotnet-sdk\Aire.Sdk.Helpers\Aire.Sdk.Helpers.csproj", "{2DCB60F0-BF4A-4B17-82DB-C3221FB1257B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.TableStorage", "submodules\aire-dotnet-sdk\Aire.Sdk.TableStorage\Aire.Sdk.TableStorage.csproj", "{4963D1CF-FF85-47D7-A725-9CCF1239C501}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Azure", "submodules\aire-dotnet-sdk\Aire.Sdk.Azure\Aire.Sdk.Azure.csproj", "{4963D1CF-FF85-47D7-A725-9CCF1239C501}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
