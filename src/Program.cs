@@ -34,12 +34,15 @@ var host = new HostBuilder()
                     Title = "AIRe Services Module",
                     Description = "This is the reference implementation of AIRe Platform Services module."
                 },
-                Servers = DefaultOpenApiConfigurationOptions.GetHostNames(),
+                Servers = [
+                    new OpenApiServer { Url = AireEnvironment.OpenApiHost ?? "/api" }
+                ],
                 OpenApiVersion = OpenApiVersionType.V3,
-                IncludeRequestingHostName = true,
+                IncludeRequestingHostName = false,
                 ForceHttp = false,
                 ForceHttps = false,
             };
+
             return options;
         });
 
