@@ -6,7 +6,7 @@ A separate project called AIRe Hub will serve as a front-end for this module.
 
 ## Getting Started
 
-You need to have [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed.
+You need to have [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed. Pull the repository and its submodules.
 
 Open the solution in VS Code (recommended, works on Windows/Linux/macOS). You may also use Visual Studio on macOS and Windows.
 
