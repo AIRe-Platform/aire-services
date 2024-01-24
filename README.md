@@ -10,7 +10,9 @@ You need to have [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8
 
 Open the solution in VS Code (recommended, works on Windows/Linux/macOS). You may also use Visual Studio on macOS and Windows.
 
-Install the recommended extensions. Configure `local.settings.json` as instructed.
+On VS Code: Install the recommended extensions. Make sure the storage emulator (Azurite) is running all services.
+
+Configure `local.settings.json` as instructed.
 
 Hit F5 and you should be good to go.
 
