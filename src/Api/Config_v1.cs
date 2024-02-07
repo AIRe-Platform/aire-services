@@ -70,7 +70,7 @@ namespace Aire.Services.Api
             In = OpenApiSecurityLocationType.Header,
             Description = "Internal platform module service key")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Missing or invalidnservice key")]
+        [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Missing or invalid service key")]
         [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfigInternal(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "v1/config/internal")] HttpRequest req)
