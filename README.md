@@ -6,11 +6,15 @@ A separate project called AIRe Hub will serve as a front-end for this module.
 
 ## Getting Started
 
-Open the solution in VS Code (on Windows/Linux/macOS). Install the recommended extensions. Hit F5 and you should be good to go.
+You need to have [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed. Pull the repository and its submodules.
 
-You may also use Visual Studio on macOS and Windows.
+Open the solution in VS Code (recommended, works on Windows/Linux/macOS). You may also use Visual Studio on macOS and Windows.
 
-Remember to configure!
+On VS Code: Install the recommended extensions. Make sure the storage emulator (Azurite) is running all services.
+
+Configure `local.settings.json` as instructed.
+
+Hit F5 and you should be good to go.
 
 ## Configuration
 
@@ -25,8 +29,7 @@ You should create `local.settings.json` in the root of the repository when devel
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "PlatformConfiguration": "default",
     "TokenSigningKey": "<signing key shared between platform modules>",
-    "TokenEncryptionKey": "<enryption key shared between platform modules>",
-    "OpenApi__HostNames": "http://localhost:7071/api/"
+    "TokenEncryptionKey": "<enryption key shared between platform modules>"
   },
   "Host": {
     "LocalHttpPort": 7071,
@@ -36,15 +39,15 @@ You should create `local.settings.json` in the root of the repository when devel
 }
 ```
 
-The `test/CreateDefaultPlatform.http` file contains an example request for setting up default platform configuration. You can run the request directly from VS Code if you have the extension `humao.rest-client` installed.
+When developing locally, you should generate random token keys and use them across the different modules. The keys are 32 characters in length. You could use random MD5 hash generator for this purpose.
+
+The `test/CreateDefaultPlatform.http` file contains an example request for setting up the default platform configuration. You can run the request directly from VS Code if you have the extension `humao.rest-client` installed.
 
 ## API Documentation
 
-Visit path `/api/swagger/ui` to inspect. If running in localhost, there's an issue where the configuration file URL gets an invalid port.
+Visit path `/api/swagger/ui` to inspect. The default host is set to `/api` path.
 
-Simply change in the correct port in the top bar to work around the issue.
-
-Example: If the module is running on port `7071` change the URL to `http://localhost:7071/api/swagger.json`.
+You can set a custom host with `OpenApi__HostNames` environment value.
 
 ## Deployment
 
@@ -53,6 +56,7 @@ Publish the Fuctions app and then setup the following required environment value
 - `PlatformConfiguration` The name of the platform configuration to use. Default: `default`
 - `TokenSigningKey` The token signing key shared between the platform instance modules.
 - `TokenEncryptionKey` The token encryption key shared between the platform instance modules.
+- `StorageConnectionString` Connection string for table storage. You probably want to use the same value as in `AzureWebJobsStorage`.
 
 ## Disclaimer
 

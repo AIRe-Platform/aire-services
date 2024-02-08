@@ -38,6 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="submodules\aire-dotnet-sdk\Aire.Sdk.Helpers\Aire.Sdk.Helpers.csproj" />
-    <ProjectReference Include="submodules\aire-dotnet-sdk\Aire.Sdk.TableStorage\Aire.Sdk.TableStorage.csproj" />
+    <ProjectReference Include="submodules\aire-dotnet-sdk\Aire.Sdk.Azure\Aire.Sdk.Azure.csproj" />
   </ItemGroup>
 </Project>

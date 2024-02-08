@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Aire.Sdk.TableStorage;
+using Aire.Sdk.Azure;
 using Aire.Sdk.Helpers;
 using Aire.Services.Models;
 using System.Web.Http;

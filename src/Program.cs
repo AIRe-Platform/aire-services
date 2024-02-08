@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Abstractions;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Configurations;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.OpenApi.Models;
-using Aire.Sdk.TableStorage;
+using Aire.Sdk.Azure;
 using Newtonsoft.Json;
 using Aire.Services;
 
@@ -34,12 +34,15 @@ var host = new HostBuilder()
                     Title = "AIRe Services Module",
                     Description = "This is the reference implementation of AIRe Platform Services module."
                 },
-                Servers = DefaultOpenApiConfigurationOptions.GetHostNames(),
+                Servers = [
+                    new OpenApiServer { Url = AireEnvironment.OpenApiHost ?? "/api" }
+                ],
                 OpenApiVersion = OpenApiVersionType.V3,
-                IncludeRequestingHostName = true,
+                IncludeRequestingHostName = false,
                 ForceHttp = false,
                 ForceHttps = false,
             };
+
             return options;
         });
 
