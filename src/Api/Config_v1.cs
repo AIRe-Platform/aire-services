@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Aire.Sdk.Azure;
 using Aire.Services.Models;
+using Aire.Sdk.Models.Platform;
 
 namespace Aire.Services.Api
 {
