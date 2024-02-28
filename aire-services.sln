@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Helpers", "submodu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Azure", "submodules\aire-dotnet-sdk\Aire.Sdk.Azure\Aire.Sdk.Azure.csproj", "{4963D1CF-FF85-47D7-A725-9CCF1239C501}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Auth", "submodules\aire-dotnet-sdk\Aire.Sdk.Auth\Aire.Sdk.Auth.csproj", "{B04AD958-9047-4BEB-879A-1E9DF9827477}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{4963D1CF-FF85-47D7-A725-9CCF1239C501}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4963D1CF-FF85-47D7-A725-9CCF1239C501}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4963D1CF-FF85-47D7-A725-9CCF1239C501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,5 +48,6 @@ Global
 		{AC952602-AF08-4FDA-874D-EAF6CD6BF72B} = {5CE64E20-1D3C-4507-807E-A3946CAA8791}
 		{2DCB60F0-BF4A-4B17-82DB-C3221FB1257B} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
 		{4963D1CF-FF85-47D7-A725-9CCF1239C501} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
+		{B04AD958-9047-4BEB-879A-1E9DF9827477} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
 	EndGlobalSection
 EndGlobal
