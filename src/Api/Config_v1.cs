@@ -1,14 +1,16 @@
 using System.Net;
+using System.Web.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using Microsoft.Azure.Functions.Worker;
-using Aire.Sdk.Azure;
-using Aire.Services.Models;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using System.Web.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
+using Aire.Sdk.Azure;
+using Aire.Services.Models;
+using Aire.Sdk.Models.Platform;
+using Aire.Sdk.Auth.Extensions;
 
 namespace Aire.Services.Api
 {
@@ -73,8 +75,11 @@ namespace Aire.Services.Api
         [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Missing or invalid service key")]
         [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
         public async Task<IActionResult> GetConfigInternal(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "v1/config/internal")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config/internal")] HttpRequest req)
         {
+            if(!req.IsServiceRequest())
+                return new UnauthorizedResult();
+
             var entity = await _storage.RetrieveAsync<PlatformEntity>(
                 AireEnvironment.PlatformConfiguration!, 
                 AireConstants.PlatformConfigRowKey);

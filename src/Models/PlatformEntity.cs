@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using Aire.Sdk.Azure;
 using Aire.Sdk.Helpers;
+using Aire.Sdk.Models.Platform;
 
 namespace Aire.Services.Models
 {

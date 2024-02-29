@@ -9,3 +9,4 @@ Accept: application/json
 
 GET {{base_url}}/v1/config/internal HTTP/1.1
 Accept: application/json
+Aire-Service-Key: 

@@ -29,7 +29,8 @@ You should create `local.settings.json` in the root of the repository when devel
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "PlatformConfiguration": "default",
     "TokenSigningKey": "<signing key shared between platform modules>",
-    "TokenEncryptionKey": "<enryption key shared between platform modules>"
+    "TokenEncryptionKey": "<enryption key shared between platform modules>",
+    "AIRE_SERVICE_KEY": "<secret key between internal platform modules>"
   },
   "Host": {
     "LocalHttpPort": 7071,
@@ -39,7 +40,7 @@ You should create `local.settings.json` in the root of the repository when devel
 }
 ```
 
-When developing locally, you should generate random token keys and use them across the different modules. The keys are 32 characters in length. You could use random MD5 hash generator for this purpose.
+When developing locally, you should generate random token/service keys and use them across the different modules. The keys are 32 characters in length. You could use random MD5 hash generator for this purpose.
 
 The `test/CreateDefaultPlatform.http` file contains an example request for setting up the default platform configuration. You can run the request directly from VS Code if you have the extension `humao.rest-client` installed.
 
@@ -57,6 +58,7 @@ Publish the Fuctions app and then setup the following required environment value
 - `TokenSigningKey` The token signing key shared between the platform instance modules.
 - `TokenEncryptionKey` The token encryption key shared between the platform instance modules.
 - `StorageConnectionString` Connection string for table storage. You probably want to use the same value as in `AzureWebJobsStorage`.
+- `AIRE_SERVICE_KEY` The secret key shared between internal platform modules to authenticate service-to-service requests.
 
 ## Disclaimer
 
