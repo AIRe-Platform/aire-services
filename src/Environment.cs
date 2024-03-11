@@ -4,8 +4,8 @@ namespace Aire.Services
     {
         public static string? StorageConnectionString => Environment.GetEnvironmentVariable("StorageConnectionString");
         public static string? PlatformConfiguration => Environment.GetEnvironmentVariable("PlatformConfiguration");
-        public static string? TokenSigningKey => Environment.GetEnvironmentVariable("TokenSigningKey");
-        public static string? TokenEncryptionKey => Environment.GetEnvironmentVariable("TokenEncryptionKey");
+        public static string? TokenSigningKey => Environment.GetEnvironmentVariable("TOKEN_SIGNING_KEY");
+        public static string? TokenEncryptionKey => Environment.GetEnvironmentVariable("TOKEN_ENCRYPTION_KEY");
         public static string? OpenApiHost => Environment.GetEnvironmentVariable("OpenApi__HostNames");
     }
 }
