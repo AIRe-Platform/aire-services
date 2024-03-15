@@ -10,60 +10,59 @@ using Aire.Services;
 using Aire.Services.Models;
 using Aire.Sdk.Models.Platform;
 
-namespace Aire.Servces.Api.Admin
+namespace Aire.Servces.Api.Admin;
+
+public class CreateDefaultPlatform
 {
-    public class CreateDefaultPlatform
+    private readonly ILogger<CreateDefaultPlatform> _log;
+    private readonly ITableStorageService _storage;
+
+    public CreateDefaultPlatform(ILogger<CreateDefaultPlatform> log, ITableStorageService storage)
     {
-        private readonly ILogger<CreateDefaultPlatform> _log;
-        private readonly ITableStorageService _storage;
+        _log = log;
+        _storage = storage;
+    }
 
-        public CreateDefaultPlatform(ILogger<CreateDefaultPlatform> log, ITableStorageService storage)
+    [Function("CreatePlatform")]
+    [OpenApiIgnore]
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "platform/{platform_name}")] HttpRequest req,
+        string platform_name)
+    {
+        PlatformConfiguration? config = null;
+        var pk = platform_name;
+        var rk = AireConstants.PlatformConfigRowKey;
+
+        try
         {
-            _log = log;
-            _storage = storage;
+            using var stream = new StreamReader(req.Body);
+            var configData = await stream.ReadToEndAsync();
+            if (configData.Length > 0)
+            {
+                config = configData.JsonToObject<PlatformConfiguration>();
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Failed to read request body");
+            return new BadRequestResult();
         }
 
-        [Function("CreatePlatform")]
-        [OpenApiIgnore]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "platform/{platform_name}")] HttpRequest req,
-            string platform_name)
+        if (config == null)
+            return new BadRequestResult();
+
+        var ent = new PlatformEntity
         {
-            PlatformConfiguration? config = null;
-            var pk = platform_name;
-            var rk = AireConstants.PlatformConfigRowKey;
+            PartitionKey = pk,
+            RowKey = rk,
+            Config = config
+        };
 
-            try
-            {
-                using var stream = new StreamReader(req.Body);
-                var configData = await stream.ReadToEndAsync();
-                if(configData.Length > 0)
-                {
-                    config = configData.JsonToObject<PlatformConfiguration>();
-                }
-            }
-            catch(Exception ex)
-            {
-                _log.LogError(ex, "Failed to read request body");
-                return new BadRequestResult();
-            }
-            
-            if(config == null)
-                return new BadRequestResult();
+        var result = await _storage.UpsertAsync(ent);
 
-            var ent = new PlatformEntity 
-            {
-                PartitionKey = pk,
-                RowKey = rk,
-                Config = config
-            };
-
-            var result = await _storage.UpsertAsync(ent);
-
-            if(result)
-                return new NoContentResult();
-            else
-                return new InternalServerErrorResult();
-        }
+        if (result)
+            return new NoContentResult();
+        else
+            return new InternalServerErrorResult();
     }
 }

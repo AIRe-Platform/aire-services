@@ -12,86 +12,84 @@ using Aire.Services.Models;
 using Aire.Sdk.Models.Platform;
 using Aire.Sdk.Auth.Extensions;
 
-namespace Aire.Services.Api
+namespace Aire.Services.Api;
+
+public class Config_v1
 {
-    public class Config_v1
+    private readonly ILogger<Config_v1> _log;
+    private readonly ITableStorageService _storage;
+
+    public Config_v1(ILogger<Config_v1> log, ITableStorageService storage)
     {
-        private readonly ILogger<Config_v1> _log;
-        private readonly ITableStorageService _storage;
+        _log = log;
+        _storage = storage;
+    }
 
-        public Config_v1(ILogger<Config_v1> log, ITableStorageService storage)
+    [Function("GetConfig_v1")]
+    [OpenApiOperation(
+        operationId: "getConfig",
+        tags: ["configuration"],
+        Summary = "Public platform configuration",
+        Description = "Returns public platform configuration object for public clients")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
+    public async Task<IActionResult> GetConfig(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config")] HttpRequest req)
+    {
+        var entity = await _storage.RetrieveAsync<PlatformEntity>(
+            AireEnvironment.PlatformConfiguration!,
+            AireConstants.PlatformConfigRowKey);
+
+        if (entity == null)
         {
-            _log = log;
-            _storage = storage;
+            _log.LogError("Default platform not configured!");
+            return new InternalServerErrorResult();
         }
 
-        [Function("GetConfig_v1")]
-        [OpenApiOperation(
-            operationId: "getConfig", 
-            tags: ["configuration"],
-            Summary = "Public platform configuration",
-            Description = "Returns public platform configuration object for public clients")]
-        [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
-        public async Task<IActionResult> GetConfig(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config")] HttpRequest req)
+        var config = entity.Config;
+
+        // Remove services that require service-to-service authentication
+        foreach (var svc in config!.Services!)
         {
-            var entity = await _storage.RetrieveAsync<PlatformEntity>(
-                AireEnvironment.PlatformConfiguration!, 
-                AireConstants.PlatformConfigRowKey);
-            
-            if(entity == null)
-            {
-                _log.LogError("Default platform not configured!");
-                return new InternalServerErrorResult();
-            }
-
-            var config = entity.Config;
-
-            // Remove services that require service-to-service authentication
-            foreach(var svc in config!.Services!)
-            {
-                svc.Modules = svc.Modules!
-                    .Where(x => x.Access != ModuleAccess.Service)
-                    .ToList();
-            }
-
-            return new OkObjectResult(config);
+            svc.Modules = svc.Modules!
+                .Where(x => x.Access != ModuleAccess.Service)
+                .ToList();
         }
 
-        [Function("GetConfigInternal_v1")]
-        [OpenApiOperation(
-            operationId: "getConfigInternal", 
-            tags: ["configuration"],
-            Summary = "Internal platform configuration",
-            Description = "Returns internal platform configuration object for internal services")]
-        [OpenApiSecurity(
-            schemeName: "AireServiceKey", 
-            schemeType: SecuritySchemeType.ApiKey, 
-            Name = "Aire-Service-Key", 
-            In = OpenApiSecurityLocationType.Header,
-            Description = "Internal platform module service key")]
-        [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Missing or invalid service key")]
-        [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
-        public async Task<IActionResult> GetConfigInternal(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config/internal")] HttpRequest req)
+        return new OkObjectResult(config);
+    }
+
+    [Function("GetConfigInternal_v1")]
+    [OpenApiOperation(
+        operationId: "getConfigInternal",
+        tags: ["configuration"],
+        Summary = "Internal platform configuration",
+        Description = "Returns internal platform configuration object for internal services")]
+    [OpenApiSecurity(
+        schemeName: "AireServiceKey",
+        schemeType: SecuritySchemeType.ApiKey,
+        Name = "Aire-Service-Key",
+        In = OpenApiSecurityLocationType.Header,
+        Description = "Internal platform module service key")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "The platform is not configured properly")]
+    public async Task<IActionResult> GetConfigInternal(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config/internal")] HttpRequest req)
+    {
+        if (!req.IsServiceRequest())
+            return new UnauthorizedResult();
+
+        var entity = await _storage.RetrieveAsync<PlatformEntity>(
+            AireEnvironment.PlatformConfiguration!,
+            AireConstants.PlatformConfigRowKey);
+
+        if (entity == null)
         {
-            if(!req.IsServiceRequest())
-                return new UnauthorizedResult();
-
-            var entity = await _storage.RetrieveAsync<PlatformEntity>(
-                AireEnvironment.PlatformConfiguration!, 
-                AireConstants.PlatformConfigRowKey);
-            
-            if(entity == null)
-            {
-                _log.LogError("Default platform not configured!");
-                return new InternalServerErrorResult();
-            }
-
-            return new OkObjectResult(entity.Config);
+            _log.LogError("Default platform not configured!");
+            return new InternalServerErrorResult();
         }
+
+        return new OkObjectResult(entity.Config);
     }
 }
-
