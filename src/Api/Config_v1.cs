@@ -1,5 +1,4 @@
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -16,13 +15,13 @@ namespace Aire.Services.Api;
 
 public class Config_v1
 {
-    private readonly ILogger<Config_v1> _log;
     private readonly ITableStorageService _storage;
+    private readonly ILogger<Config_v1> _log;
 
-    public Config_v1(ILogger<Config_v1> log, ITableStorageService storage)
+    public Config_v1(ITableStorageService storage, ILogger<Config_v1> log)
     {
-        _log = log;
         _storage = storage;
+        _log = log;
     }
 
     [Function("GetConfig_v1")]
@@ -40,21 +39,34 @@ public class Config_v1
             AireEnvironment.PlatformConfiguration!,
             AireConstants.PlatformConfigRowKey);
 
-        if (entity == null)
+        if (entity == null || entity.Platform == null)
         {
-            _log.LogError("Default platform not configured!");
-            return new InternalServerErrorResult();
+            throw new Exception("Default platform not configured!");
         }
 
-        var config = entity.Config;
+        var serviceQuery = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == entity.PartitionKey);
+        var serviceList = await serviceQuery.ToListAsync();
+        var services = serviceList.Select(x => x.ToModel()).ToList();
 
+        // Only public modules:
         // Remove services that require service-to-service authentication
-        foreach (var svc in config!.Services!)
+        foreach (var svc in services)
         {
-            svc.Modules = svc.Modules!
+            svc.Modules = svc.Modules?
                 .Where(x => x.Access != ModuleAccess.Service)
                 .ToList();
         }
+
+        // Delist services with no available modules
+        services = services
+            .Where(x => x.Modules != null && x.Modules.Count > 0)
+            .ToList();
+
+        var config = new PlatformConfiguration
+        {
+            Platform = entity.Platform,
+            Services = services
+        };
 
         return new OkObjectResult(config);
     }
@@ -84,12 +96,21 @@ public class Config_v1
             AireEnvironment.PlatformConfiguration!,
             AireConstants.PlatformConfigRowKey);
 
-        if (entity == null)
+        if (entity == null || entity.Platform == null)
         {
-            _log.LogError("Default platform not configured!");
-            return new InternalServerErrorResult();
+            throw new Exception("Default platform not configured!");
         }
 
-        return new OkObjectResult(entity.Config);
+        var serviceQuery = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == entity.PartitionKey);
+        var serviceList = await serviceQuery.ToListAsync();
+        var services = serviceList.Select(x => x.ToModel()).ToList();
+
+        var config = new PlatformConfiguration
+        {
+            Platform = entity.Platform,
+            Services = services
+        };
+
+        return new OkObjectResult(config);
     }
 }

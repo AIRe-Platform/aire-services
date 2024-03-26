@@ -5,15 +5,50 @@ using Aire.Sdk.Models.Platform;
 
 namespace Aire.Services.Models
 {
+    /// <summary>
+    /// Platform configuration name: PartitionKey
+    /// Service ID: RowKey
+    /// </summary>
     [EntityTable("Services")]
     public class ServiceEntity : BaseTableEntity
     {
-        public string? ServiceData { get; set; }
+        public string? Name { get; set; }
+        public string? Owner { get; set; }
+        public string? ModuleData { get; set; }
 
         [IgnoreDataMember]
-        public Service? Service {
-            get => ServiceData?.JsonToObject<Service>();
-            set => ServiceData = value.ObjectToJson();
+        public List<Module>? Modules
+        {
+            get => ModuleData?.JsonToObject<List<Module>>();
+            set => ModuleData = value.ObjectToJson();
+        }
+
+        public ServiceEntity() { }
+        public ServiceEntity(string platform_config_name)
+        {
+            PartitionKey = platform_config_name;
+            RowKey = Guid.NewGuid().ToString();
+        }
+
+        public string PlatformConfig()
+        {
+            return PartitionKey ?? "";
+        }
+
+        public string Id()
+        {
+            return RowKey ?? "";
+        }
+
+        public Service ToModel()
+        {
+            return new Service()
+            {
+                Id = Id(),
+                Name = Name,
+                Owner = Owner,
+                Modules = Modules
+            };
         }
     }
 }

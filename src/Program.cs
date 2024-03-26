@@ -9,12 +9,19 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Aire.Sdk.Azure;
 using Aire.Services;
+using Aire.Sdk.Auth;
+using Aire.Sdk.Auth.Extensions;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(worker => {
-        worker.UseNewtonsoftJson();
+        worker.UseNewtonsoftJson();        
+        worker.UseJwtAuth(new JwtTokenServiceConfiguration() {
+            SigningKey = AireEnvironment.TokenSigningKey,
+            EncryptionKey = AireEnvironment.TokenEncryptionKey
+        });
     })
     .ConfigureServices(services => {
+        services.AddHttpClient();
         services.AddApplicationInsightsTelemetryWorkerService();
 
         services
@@ -32,7 +39,7 @@ var host = new HostBuilder()
                 Info = new OpenApiInfo {
                     Version = "0.1.0",
                     Title = "AIRe Services Module",
-                    Description = "This is the reference implementation of AIRe Platform Services module."
+                    Description = "This is the reference implementation of the AIRe Platform Services module."
                 },
                 Servers = [
                     new OpenApiServer { Url = AireEnvironment.OpenApiHost ?? "/api" }

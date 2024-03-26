@@ -1,16 +1,14 @@
-using System.Web.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Aire.Sdk.Azure;
-using Aire.Sdk.Helpers;
-using Aire.Services;
 using Aire.Services.Models;
 using Aire.Sdk.Models.Platform;
+using Aire.Sdk.AspNetCore;
 
-namespace Aire.Servces.Api.Admin;
+namespace Aire.Services.Api.Admin;
 
 public class CreateDefaultPlatform
 {
@@ -29,40 +27,24 @@ public class CreateDefaultPlatform
         [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "platform/{platform_name}")] HttpRequest req,
         string platform_name)
     {
-        PlatformConfiguration? config = null;
         var pk = platform_name;
         var rk = AireConstants.PlatformConfigRowKey;
+        var platform = await req.ReadJson<Platform>();
 
-        try
-        {
-            using var stream = new StreamReader(req.Body);
-            var configData = await stream.ReadToEndAsync();
-            if (configData.Length > 0)
-            {
-                config = configData.JsonToObject<PlatformConfiguration>();
-            }
-        }
-        catch (Exception ex)
-        {
-            _log.LogError(ex, "Failed to read request body");
-            return new BadRequestResult();
-        }
-
-        if (config == null)
+        if (platform == null)
             return new BadRequestResult();
 
         var ent = new PlatformEntity
         {
             PartitionKey = pk,
             RowKey = rk,
-            Config = config
+            Platform = platform
         };
 
         var result = await _storage.UpsertAsync(ent);
+        if (!result)
+            throw new Exception("Failed to insert entity");
 
-        if (result)
-            return new NoContentResult();
-        else
-            return new InternalServerErrorResult();
+        return new NoContentResult();
     }
 }
