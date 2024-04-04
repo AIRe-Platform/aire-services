@@ -104,7 +104,8 @@ public class ServiceRegistration_v1
         {
             Name = service.Name,
             Owner = service.Owner ?? auth.UserId,
-            Modules = service.Modules
+            Modules = service.Modules,
+            Active = service.Active.GetValueOrDefault(false)
         };
 
         if (string.IsNullOrWhiteSpace(entity.Name) ||
@@ -177,6 +178,9 @@ public class ServiceRegistration_v1
 
         if (data.Modules != null)
             entity.Modules = data.Modules;
+
+        if (data.Active.HasValue)
+            entity.Active = data.Active.Value;
 
         var update = await _storage.UpsertAsync(entity);
         if (!update)
