@@ -45,13 +45,12 @@ public class ServiceRegistration_v1
         if (auth == null)
             return new UnauthorizedResult();
 
-        bool admin = _jwt.CheckAuthorization(auth, AireScopes.AdminServices);
-        if (!_jwt.CheckAuthorization(auth, AireScopes.ReadServices) && !admin)
+        if (!_jwt.CheckAuthorization(auth, AireScopes.ReadServices))
             return new ForbiddenResult();
 
         List<Service> services;
 
-        if (admin)
+        if (auth.Principal.IsInRole(AireRoles.Admin))
         {
             var q = await _storage.All<ServiceEntity>();
             services = q.Select(x => x.ToModel()).ToList();
@@ -86,8 +85,7 @@ public class ServiceRegistration_v1
         if (auth == null)
             return new UnauthorizedResult();
 
-        bool admin = _jwt.CheckAuthorization(auth, AireScopes.AdminServices);
-        if (!_jwt.CheckAuthorization(auth, AireScopes.ReadServices) && !admin)
+        if (!_jwt.CheckAuthorization(auth, AireScopes.ReadServices))
             return new ForbiddenResult();
 
         var service = await req.ReadJson<Service>();
@@ -98,6 +96,7 @@ public class ServiceRegistration_v1
         if (config == null)
             throw new Exception("The platform is not configured");
 
+        bool admin = auth.Principal.IsInRole(AireRoles.Admin);
         if (!admin && service.Owner != null && service.Owner != auth.UserId)
             return new ForbiddenResult();
 
@@ -150,8 +149,7 @@ public class ServiceRegistration_v1
         if (auth == null)
             return new UnauthorizedResult();
 
-        bool admin = _jwt.CheckAuthorization(auth, AireScopes.AdminServices);
-        if (!_jwt.CheckAuthorization(auth, AireScopes.EditServices) && !admin)
+        if (!_jwt.CheckAuthorization(auth, AireScopes.EditServices))
             return new ForbiddenResult();
 
         var data = await req.ReadJson<Service>();
@@ -171,7 +169,7 @@ public class ServiceRegistration_v1
 
         if (data.Owner != null && data.Owner != entity.Owner)
         {
-            if (!admin)
+            if (!auth.Principal.IsInRole(AireRoles.Admin))
                 return new ForbiddenResult();
 
             entity.Owner = data.Owner;
@@ -209,8 +207,7 @@ public class ServiceRegistration_v1
         if (auth == null)
             return new UnauthorizedResult();
 
-        bool admin = _jwt.CheckAuthorization(auth, AireScopes.AdminServices);
-        if (!_jwt.CheckAuthorization(auth, AireScopes.DeleteServices) && !admin)
+        if (!_jwt.CheckAuthorization(auth, AireScopes.DeleteServices))
             return new ForbiddenResult();
 
         if (string.IsNullOrWhiteSpace(id))
@@ -224,6 +221,7 @@ public class ServiceRegistration_v1
         if (entity == null)
             return new NotFoundResult();
 
+        bool admin = auth.Principal.IsInRole(AireRoles.Admin);
         if (!admin && entity.Owner != auth.UserId)
             return new ForbiddenResult();
 

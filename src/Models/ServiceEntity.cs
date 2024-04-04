@@ -15,6 +15,7 @@ namespace Aire.Services.Models
         public string? Name { get; set; }
         public string? Owner { get; set; }
         public string? ModuleData { get; set; }
+        public bool Active { get; set; }
 
         [IgnoreDataMember]
         public List<Module>? Modules
@@ -47,7 +48,8 @@ namespace Aire.Services.Models
                 Id = Id(),
                 Name = Name,
                 Owner = Owner,
-                Modules = Modules
+                Modules = Modules,
+                Active = Active
             };
         }
     }

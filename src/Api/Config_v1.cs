@@ -59,7 +59,7 @@ public class Config_v1
 
         // Delist services with no available modules
         services = services
-            .Where(x => x.Modules != null && x.Modules.Count > 0)
+            .Where(x => x.Modules != null && x.Modules.Count > 0 && x.Active == true)
             .ToList();
 
         var config = new PlatformConfiguration
@@ -103,7 +103,7 @@ public class Config_v1
 
         var serviceQuery = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == entity.PartitionKey);
         var serviceList = await serviceQuery.ToListAsync();
-        var services = serviceList.Select(x => x.ToModel()).ToList();
+        var services = serviceList.Where(x => x.Active).Select(x => x.ToModel()).ToList();
 
         var config = new PlatformConfiguration
         {
