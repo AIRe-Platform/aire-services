@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Azure", "submodule
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Auth", "submodules\aire-dotnet-sdk\Aire.Sdk.Auth\Aire.Sdk.Auth.csproj", "{B04AD958-9047-4BEB-879A-1E9DF9827477}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.Models", "submodules\aire-dotnet-sdk\Aire.Sdk.Models\Aire.Sdk.Models.csproj", "{075764ED-0685-4D50-B927-8AF26C689DAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aire.Sdk.AspNetCore", "submodules\aire-dotnet-sdk\Aire.Sdk.AspNetCore\Aire.Sdk.AspNetCore.csproj", "{410F5B63-D2D4-4391-A093-D931D6A7A3BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,14 @@ Global
 		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B04AD958-9047-4BEB-879A-1E9DF9827477}.Release|Any CPU.Build.0 = Release|Any CPU
+		{075764ED-0685-4D50-B927-8AF26C689DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{075764ED-0685-4D50-B927-8AF26C689DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{075764ED-0685-4D50-B927-8AF26C689DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{075764ED-0685-4D50-B927-8AF26C689DAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{410F5B63-D2D4-4391-A093-D931D6A7A3BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{410F5B63-D2D4-4391-A093-D931D6A7A3BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{410F5B63-D2D4-4391-A093-D931D6A7A3BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{410F5B63-D2D4-4391-A093-D931D6A7A3BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,5 +61,7 @@ Global
 		{2DCB60F0-BF4A-4B17-82DB-C3221FB1257B} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
 		{4963D1CF-FF85-47D7-A725-9CCF1239C501} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
 		{B04AD958-9047-4BEB-879A-1E9DF9827477} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
+		{075764ED-0685-4D50-B927-8AF26C689DAD} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
+		{410F5B63-D2D4-4391-A093-D931D6A7A3BA} = {AC952602-AF08-4FDA-874D-EAF6CD6BF72B}
 	EndGlobalSection
 EndGlobal
