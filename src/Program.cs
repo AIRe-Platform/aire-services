@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
@@ -13,30 +14,42 @@ using Aire.Sdk.Auth;
 using Aire.Sdk.Auth.Extensions;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication(worker => {
-        worker.UseNewtonsoftJson();        
-        worker.UseJwtAuth(new JwtTokenServiceConfiguration() {
+    .ConfigureFunctionsWebApplication(worker =>
+    {
+        worker.UseNewtonsoftJson();
+        worker.UseJwtAuth(new JwtTokenServiceConfiguration()
+        {
             SigningKey = AireEnvironment.TokenSigningKey,
             EncryptionKey = AireEnvironment.TokenEncryptionKey
         });
     })
-    .ConfigureServices(services => {
+    .ConfigureServices(services =>
+    {
         services.AddHttpClient();
         services.AddApplicationInsightsTelemetryWorkerService();
 
-        services
-            .AddSingleton<ITableStorageService, TableStorageService>()
-            .Configure<TableStorageConfiguration>(o => {
-                o.ConnectionString = AireEnvironment.StorageConnectionString;
-            });
+        services.AddAzureClients(builder =>
+        {
+            builder.AddTableServiceClient(AireEnvironment.StorageConnectionString)
+                .ConfigureOptions(options =>
+                {
+                    options.Diagnostics.IsLoggingEnabled = false;
+                });
+        });
+        
+        services.AddSingleton<ITableStorageService, TableStorageService>();
 
-        services.AddMvcCore().AddNewtonsoftJson(options => {
+        services.AddMvcCore().AddNewtonsoftJson(options =>
+        {
             options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
         });
 
-        services.AddSingleton<IOpenApiConfigurationOptions>(_ => {
-            var options = new OpenApiConfigurationOptions {
-                Info = new OpenApiInfo {
+        services.AddSingleton<IOpenApiConfigurationOptions>(_ =>
+        {
+            var options = new OpenApiConfigurationOptions
+            {
+                Info = new OpenApiInfo
+                {
                     Version = "0.1.0",
                     Title = "AIRe Services Module",
                     Description = "This is the reference implementation of the AIRe Platform Services module."
