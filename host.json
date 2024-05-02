@@ -8,7 +8,11 @@
             },
             "enableLiveMetricsFilters": true
         },
-        "logLevel": { "default": "Information" }
+        "logLevel": {
+            "default": "Information",
+            "Function": "Warning",
+            "Azure.Core": "Warning"
+        }
     },
     "extensions": {
         "http": {
