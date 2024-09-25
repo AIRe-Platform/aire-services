@@ -17,6 +17,7 @@ using Aire.Sdk.Azure;
 using Aire.Services;
 using Aire.Sdk.Auth;
 using Aire.Sdk.Auth.Extensions;
+using Aire.Services.Backup;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(worker =>
@@ -41,7 +42,7 @@ var host = new HostBuilder()
                     options.Diagnostics.IsLoggingEnabled = false;
                 });
         });
-        
+
         services.AddSingleton<ITableStorageService, TableStorageService>();
 
         services.AddMvcCore().AddNewtonsoftJson(options =>
@@ -72,6 +73,18 @@ var host = new HostBuilder()
         });
 
         services.ConfigureFunctionsApplicationInsights();
+
+        services.Configure<TableBackupOptions>(o =>
+        {
+            o.Tables = AireEnvironment.BackupTables?
+                .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            o.SourceStorageConnectionString = AireEnvironment.StorageConnectionString;
+            o.DestinationStorageConnectionString = AireEnvironment.BackupStorageConnectionString;
+
+            if (AireEnvironment.BackupExpiryDays != null)
+                o.CleanUpOlderThan = TimeSpan.FromDays(int.Parse(AireEnvironment.BackupExpiryDays));
+        });
     })
     .Build();
 
