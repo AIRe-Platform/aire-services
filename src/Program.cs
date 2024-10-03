@@ -1,4 +1,9 @@
-﻿using Microsoft.Azure.Functions.Worker;
+﻿// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +17,7 @@ using Aire.Sdk.Azure;
 using Aire.Services;
 using Aire.Sdk.Auth;
 using Aire.Sdk.Auth.Extensions;
+using Aire.Services.Backup;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(worker =>
@@ -36,7 +42,7 @@ var host = new HostBuilder()
                     options.Diagnostics.IsLoggingEnabled = false;
                 });
         });
-        
+
         services.AddSingleton<ITableStorageService, TableStorageService>();
 
         services.AddMvcCore().AddNewtonsoftJson(options =>
@@ -67,6 +73,18 @@ var host = new HostBuilder()
         });
 
         services.ConfigureFunctionsApplicationInsights();
+
+        services.Configure<TableBackupOptions>(o =>
+        {
+            o.Tables = AireEnvironment.BackupTables?
+                .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            o.SourceStorageConnectionString = AireEnvironment.StorageConnectionString;
+            o.DestinationStorageConnectionString = AireEnvironment.BackupStorageConnectionString;
+
+            if (AireEnvironment.BackupExpiryDays != null)
+                o.CleanUpOlderThan = TimeSpan.FromDays(int.Parse(AireEnvironment.BackupExpiryDays));
+        });
     })
     .Build();
 

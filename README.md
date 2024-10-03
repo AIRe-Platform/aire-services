@@ -77,6 +77,31 @@ Publish the Fuctions app and then setup the following required environment value
 - `StorageConnectionString` Connection string for table storage. You probably want to use the same value as in `AzureWebJobsStorage`.
 - `AIRE_SERVICE_KEY` The secret key shared between internal platform modules to authenticate service-to-service requests.
 
+## Scheduling Table Backups
+
+This service has a backup feature for Azure Table storage. To configure automatic backups, add the following environment values:
+
+- `BackupStorageConnectionString` **Required**
+  - The connection string to the storage account that will store the backups.
+  - You may use the same connection string as the `StorageConnectionString` if you want to have the backups in the same account.
+- `BackupTables` **Required**
+  - Comma-separated list of table names. 
+  - E.g., `Platform,Services,Users,Clients`.
+- `BackupExpiryDays` _Optional_
+  - Number of days to keep backups.
+
+The timer for table backups will trigger on every Sunday at 01:00 UTC. The clean up routine is run every Sunday at 00:00 UTC respectively. You can modify this behavior in `src/Backup/TableBackupTimers.cs`.
+
+Example configuration:
+```jsonc
+{
+  /* ... */
+  "BackupStorageConnectionString": "...",
+  "BackupTables": "Platform,Services,Clients,DemoGroup,Users,MailTemplate,Contents,ContentVotes,Questionnaires,QuestionnaireResults,Keywords,KeywordIndex,Chatlogs,Events",
+  "BackupExpiryDays": "30"
+}
+```
+
 ## Disclaimer
 
 This README is a work-in-progress. The information above may be out-dated or incorrect.

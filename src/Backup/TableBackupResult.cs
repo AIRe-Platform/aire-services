@@ -3,10 +3,10 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-namespace Aire.Services
+namespace Aire.Services.Backup;
+
+public class TableBackupResult
 {
-    public static class AireConstants
-    {
-        public const string PlatformConfigRowKey = "platform";
-    }
+    public int Entities { get; set; }
+    public int Failures { get; set; }
 }
