@@ -27,14 +27,14 @@ namespace Aire.Services.Models
             {
                 var platform = ConfigData?.JsonToObject<Platform>();
 
-                if (platform is not null)
-                {
-                    platform.Settings = Settings;
-                }
                 if (platform?.Modules == null)
                 {
                     var config = ConfigData?.JsonToObject<PlatformConfiguration>();
                     platform = config?.Platform;
+                }
+                if (platform is not null)
+                {
+                    platform.Settings = Settings;
                 }
                 return platform;
             }
