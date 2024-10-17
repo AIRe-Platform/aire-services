@@ -18,19 +18,36 @@ namespace Aire.Services.Models
     public class PlatformEntity : BaseTableEntity
     {
         public string? ConfigData { get; set; }
+        public string? InstanceSettings { get; set; }
 
         [IgnoreDataMember]
-        public Platform? Platform {
-            get {
+        public Platform? Platform
+        {
+            get
+            {
                 var platform = ConfigData?.JsonToObject<Platform>();
-                if(platform?.Modules == null)
+
+                if (platform?.Modules == null)
                 {
                     var config = ConfigData?.JsonToObject<PlatformConfiguration>();
                     platform = config?.Platform;
+                }
+                if (platform is not null)
+                {
+                    platform.Settings = Settings;
                 }
                 return platform;
             }
             set => ConfigData = value.ObjectToJson();
         }
+
+        [IgnoreDataMember]
+        public InstanceSettings Settings
+        {
+            get => InstanceSettings?.JsonToObject<InstanceSettings>() ?? _defaultInstanceSettings;
+            set => InstanceSettings = value.ObjectToJson();
+        }
+
+        private static readonly InstanceSettings _defaultInstanceSettings = new() { InactivityDuration = 30 };
     }
 }
