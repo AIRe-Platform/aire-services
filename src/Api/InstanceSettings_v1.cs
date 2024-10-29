@@ -30,7 +30,6 @@ public class InstanceSettings_v1(IJwtTokenService _jwt, ITableStorageService _st
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(InstanceSettings), Description = "Edited instance settings object")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
-    [OpenApiResponseWithBody(HttpStatusCode.BadRequest, "application/json", typeof(List<ValidationResult>), Description = "Invalid request with validation errors")]
     [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
     public async Task<IActionResult> EditInactivityDuration(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "v1/settings/inactivity")] HttpRequest req,

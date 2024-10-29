@@ -32,7 +32,7 @@ public class Config_v1
     [Function("GetConfig_v1")]
     [OpenApiOperation(
         operationId: "getConfig",
-        tags: ["configuration"],
+        tags: ["Configuration"],
         Summary = "Public platform configuration",
         Description = "Returns public platform configuration object for public clients")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
@@ -79,7 +79,7 @@ public class Config_v1
     [Function("GetConfigInternal_v1")]
     [OpenApiOperation(
         operationId: "getConfigInternal",
-        tags: ["configuration"],
+        tags: ["Configuration"],
         Summary = "Internal platform configuration",
         Description = "Returns internal platform configuration object for internal services")]
     [OpenApiSecurity(
