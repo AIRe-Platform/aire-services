@@ -270,3 +270,6 @@ __azurite*__.json
 
 # Backup utils
 !src/Backup/
+
+# Doxygen
+docs/Doxygen
