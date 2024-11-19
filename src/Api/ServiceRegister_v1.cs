@@ -90,7 +90,7 @@ public class ServiceRegistration_v1
         if (auth == null)
             return new UnauthorizedResult();
 
-        if (!_jwt.CheckAuthorization(auth, AireScopes.ReadServices))
+        if (!_jwt.CheckAuthorization(auth, AireScopes.EditServices))
             return new ForbiddenResult();
 
         var service = await req.ReadJson<Service>();

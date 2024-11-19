@@ -40,7 +40,7 @@ public class InstanceSettings_v1(IJwtTokenService _jwt, ITableStorageService _st
         if (auth == null)
             return new UnauthorizedResult();
 
-        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminAccounts))
+        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminInstanceSettings))
             return new ForbiddenResult();
 
         var platformEntity = await _storage.RetrieveAsync<PlatformEntity>(
@@ -59,10 +59,6 @@ public class InstanceSettings_v1(IJwtTokenService _jwt, ITableStorageService _st
         bool isValid = Validator.TryValidateProperty(settingsEntity.InactivityDuration, validationContext, validationResults);
         if (!isValid)
             return new BadRequestObjectResult(validationResults);
-
-        bool admin = auth.Principal.IsInRole(AireRoles.Admin);
-        if (!admin)
-            return new ForbiddenResult();
 
         InstanceSettings updatedSettings = platformEntity.Settings;
         updatedSettings.InactivityDuration = settingsEntity.InactivityDuration;
