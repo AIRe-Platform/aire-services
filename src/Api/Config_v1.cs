@@ -67,9 +67,18 @@ public class Config_v1
             .Where(x => x.Modules != null && x.Modules.Count > 0 && x.Active == true)
             .ToList();
 
+        var platform = entity.Platform;
+        if (platform.Modules != null)
+        {
+            foreach (var mod in platform.Modules)
+            {
+                mod.Value.Settings = null; // Module settings are internal only
+            }
+        }
+
         var config = new PlatformConfiguration
         {
-            Platform = entity.Platform,
+            Platform = platform,
             Services = services
         };
 
