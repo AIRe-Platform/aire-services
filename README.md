@@ -1,20 +1,3 @@
-## TODO: Refactor this document to have an structure like this:
-## Table of Contents
-1. [Introduction](#introduction)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [Configuration](#configuration)
-5. [Contributing](#contributing)
-6. [API Reference](#api-reference)
-7. [Testing](#testing)
-8. [Deployment](#deployment)
-9. [Roadmap](#roadmap)
-10. [FAQ](#faq)
-11. [Troubleshooting](#troubleshooting)
-12. [License](#license)
-13. [Acknowledgments](#acknowledgments)
-14. [Contact](#contact)
-
 # AIRe Services
 
 This module is the core of the AIRe platform. It manages all other modules in the AIRe platform instance.
@@ -71,11 +54,11 @@ You can set a custom host with `OpenApi__HostNames` environment value.
 
 Publish the Fuctions app and then setup the following required environment values:
 
-- `PlatformConfiguration` The name of the platform configuration to use. Default: `default`
+- `AIRE_SERVICE_KEY` The secret key shared between internal platform modules to authenticate service-to-service requests.
 - `TOKEN_SIGNING_KEY` The token signing key shared between the platform instance modules.
 - `TOKEN_ENCRYPTION_KEY` The token encryption key shared between the platform instance modules.
+- `PlatformConfiguration` The name of the platform configuration to use. Default: `default`
 - `StorageConnectionString` Connection string for table storage. You probably want to use the same value as in `AzureWebJobsStorage`.
-- `AIRE_SERVICE_KEY` The secret key shared between internal platform modules to authenticate service-to-service requests.
 
 ## Scheduling Table Backups
 
@@ -101,7 +84,3 @@ Example configuration:
   "BackupExpiryDays": "30"
 }
 ```
-
-## Disclaimer
-
-This README is a work-in-progress. The information above may be out-dated or incorrect.
