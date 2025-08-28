@@ -267,9 +267,7 @@ __pycache__/
 __azurite*__.json
 /__blobstorage__
 /__queuestorage__
-
-# Backup utils
-!src/Backup/
+AzuriteConfig
 
 # Doxygen
 docs/Doxygen
