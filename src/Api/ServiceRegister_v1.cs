@@ -55,7 +55,7 @@ public class ServiceRegistration_v1
 
         List<Service> services;
 
-        if (auth.Principal.IsInRole(AireRoles.Admin) || auth.Principal.IsInRole(AireRoles.ProductOwner))
+        if (auth.Principal.IsInRole(AireRoles.Admin) || auth.Principal.IsInRole(AireRoles.KeyUser))
         {
             var q = await _storage.All<ServiceEntity>();
             services = q.Select(x => x.ToModel()).ToList();
