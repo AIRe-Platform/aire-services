@@ -22,11 +22,7 @@ namespace Aire.Services.Api;
 public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 {
     [Function("GetPublicConfig_v1")]
-    [OpenApiOperation(
-        operationId: "getPublicConfig",
-        tags: ["Configuration"],
-        Summary = "Public platform configuration",
-        Description = "Returns public platform configuration object for public clients")]
+    [OpenApiOperation("getPublicConfig", ["Configuration"], Summary = "Public platform configuration")]
     [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
@@ -93,16 +89,15 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
     }
 
     [Function("GetConfigInternal_v1")]
-    [OpenApiOperation(
-        operationId: "getConfigInternal",
-        tags: ["Configuration"],
-        Summary = "Internal platform configuration",
-        Description = "Returns internal platform configuration object for internal services")]
+    [OpenApiOperation("getConfigInternal", ["Configuration"], Summary = "Internal platform configuration")]
     [OpenApiSecurity("AireServiceKey", SecuritySchemeType.ApiKey,
         Name = "Aire-Service-Key",
         In = OpenApiSecurityLocationType.Header,
         Description = "Internal platform module service key")]
-    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http,
+        Scheme = OpenApiSecuritySchemeType.Bearer,
+        BearerFormat = "JWT",
+        Description = "User token")]
     [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
@@ -146,11 +141,7 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
     }
 
     [Function("ListConfigurations_v1")]
-    [OpenApiOperation(
-        operationId: "listConfigurations",
-        tags: ["Configuration"],
-        Summary = "List platform configurations",
-        Description = "Returns list of platform configuration objects")]
+    [OpenApiOperation("listConfigurations", ["Configuration"], Summary = "List platform configurations")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(List<PlatformConfiguration>), Description = "Platform configuration list")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
@@ -186,5 +177,42 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
         }
 
         return new OkObjectResult(results);
+    }
+
+    [Function("EditConfiguration_v1")]
+    [OpenApiOperation("editConfiguration", ["Configuration"], Summary = "Edit platform configuration")]
+    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
+    [OpenApiRequestBody("application/json", typeof(Platform), Required = true, Description = "Platform configuration")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Platform), Description = "Platform configuration list")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.UnprocessableEntity, Description = "Failed to parse request")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
+    public async Task<IActionResult> EditConfiguration(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "v1/config/{id}")] HttpRequest req,
+        FunctionContext context,
+        string id)
+    {
+        var auth = context.Features.Get<JwtAuthFeature>();
+        if (auth == null)
+            return new UnauthorizedResult();
+
+        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminConfig))
+            return new ForbiddenResult();
+
+        var config = await req.ReadJson<Platform>();
+        if (config == null)
+            return new UnprocessableEntityResult();
+
+        var entity = await _storage.RetrieveAsync<PlatformEntity>(id, AireConstants.PlatformConfigRowKey);
+        if (entity == null)
+            return new NotFoundResult();
+
+        entity.Platform = config;
+        bool updated = await _storage.UpsertAsync(entity);
+        if (!updated)
+            throw new Exception("Failed to update module settings");
+
+        return new OkObjectResult(entity.Platform);
     }
 }

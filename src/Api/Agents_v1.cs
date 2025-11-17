@@ -19,7 +19,7 @@ using Microsoft.OpenApi.Models;
 
 namespace Aire.Services.Api;
 
-public class AgentConfig_v1(IJwtTokenService _jwt, ITableStorageService _storage)
+public class Agents_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 {
     [Function("GetAgentConfiguration_v1")]
     [OpenApiOperation("getAgentConfiguration", ["Agents"], Summary = "Get agent configurations")]

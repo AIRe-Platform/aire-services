@@ -18,7 +18,7 @@ using Microsoft.OpenApi.Models;
 
 namespace Aire.Services.Api;
 
-public class ServiceRegistration_v1(IJwtTokenService _jwt, ITableStorageService _storage)
+public class Services_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 {
     [Function("GetServiceList_v1")]
     [OpenApiOperation(

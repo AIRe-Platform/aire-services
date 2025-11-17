@@ -9,12 +9,18 @@ Accept: application/json
 Authorization: Bearer {{user_token}}
 
 ### Get platform config
-
 GET {{base_url}}/v1/config/{{config_id}}/public HTTP/1.1
 Accept: application/json
 
 ### Get internal platform config
-
 GET {{base_url}}/v1/config/{{config_id}}/internal HTTP/1.1
 Accept: application/json
 Aire-Service-Key: {{service_key}}
+
+### Edit platform config
+PUT {{base_url}}/v1/config/{{config_id}} HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{user_token}}
+
+< ./PlatformConfig.json
