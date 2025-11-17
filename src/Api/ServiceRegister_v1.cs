@@ -14,24 +14,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace Aire.Services.Api;
 
-public class ServiceRegistration_v1
+public class ServiceRegistration_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 {
-    private readonly IJwtTokenService _jwt;
-    private readonly ITableStorageService _storage;
-    private readonly ILogger<ServiceRegistration_v1> _log;
-
-    public ServiceRegistration_v1(IJwtTokenService jwt, ITableStorageService storage, ILogger<ServiceRegistration_v1> log)
-    {
-        _jwt = jwt;
-        _log = log;
-        _storage = storage;
-    }
-
     [Function("GetServiceList_v1")]
     [OpenApiOperation(
         operationId: "getServiceList",
@@ -39,12 +27,14 @@ public class ServiceRegistration_v1
         Summary = "List of services",
         Description = "Returns public platform configuration object for public clients")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("config_id", Description = "Configuration identifier", Required = true, In = ParameterLocation.Path)]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(List<Service>), Description = "List of services")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     public async Task<IActionResult> GetServiceList(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/service-register/services")] HttpRequest req,
-        FunctionContext context)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config/{config_id}/services")] HttpRequest req,
+        FunctionContext context,
+        string config_id)
     {
         var auth = context.Features.Get<JwtAuthFeature>();
         if (auth == null)
@@ -57,14 +47,14 @@ public class ServiceRegistration_v1
 
         if (auth.Principal.IsInRole(AireRoles.Admin) || auth.Principal.IsInRole(AireRoles.KeyUser))
         {
-            var q = await _storage.All<ServiceEntity>();
-            services = q.Select(x => x.ToModel()).ToList();
+            var q = await _storage.Partition<ServiceEntity>(config_id);
+            services = [.. q.Select(x => x.ToModel())];
         }
         else
         {
             var q = await _storage.QueryAsync<ServiceEntity>(x => x.Owner == auth.UserId);
             var list = await q.ToListAsync();
-            services = list.Select(x => x.ToModel()).ToList();
+            services = [.. list.Select(x => x.ToModel())];
         }
 
         return new OkObjectResult(services);
@@ -77,14 +67,17 @@ public class ServiceRegistration_v1
         Summary = "Register a new service",
         Description = "Creates a new service object")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("config_id", Description = "Configuration identifier", Required = true, In = ParameterLocation.Path)]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Service), Description = "Created service object")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Conflict, Description = "A service with the name already exists")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
     [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
     public async Task<IActionResult> RegisterService(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/service-register")] HttpRequest req,
-        FunctionContext context)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/config/{config_id}/services")] HttpRequest req,
+        FunctionContext context,
+        string config_id)
     {
         var auth = context.Features.Get<JwtAuthFeature>();
         if (auth == null)
@@ -97,15 +90,15 @@ public class ServiceRegistration_v1
         if (service == null)
             return new BadRequestResult();
 
-        string? config = AireEnvironment.PlatformConfiguration;
+        var config = await _storage.RetrieveAsync<PlatformEntity>(config_id, AireConstants.PlatformConfigRowKey);
         if (config == null)
-            throw new Exception("The platform is not configured");
+            return new NotFoundResult();
 
         bool admin = auth.Principal.IsInRole(AireRoles.Admin);
         if (!admin && service.Owner != null && service.Owner != auth.UserId)
             return new ForbiddenResult();
 
-        var entity = new ServiceEntity(config)
+        var entity = new ServiceEntity(config.RowKey!)
         {
             Name = service.Name,
             Owner = service.Owner ?? auth.UserId,
@@ -120,7 +113,7 @@ public class ServiceRegistration_v1
             return new BadRequestResult();
         }
 
-        var queryExisting = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == config && x.Name == entity.Name);
+        var queryExisting = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == config.RowKey && x.Name == entity.Name);
         var existing = await queryExisting.FirstOrDefaultAsync();
         if (existing != null)
             return new ConflictResult();
@@ -139,7 +132,8 @@ public class ServiceRegistration_v1
         Summary = "Edit a service",
         Description = "Returns public platform configuration object for public clients")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
-    [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Service identifier")]
+    [OpenApiParameter("config_id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
+    [OpenApiParameter("service_id", In = ParameterLocation.Path, Required = true, Description = "Service identifier")]
     [OpenApiRequestBody("application/json", typeof(Service), Required = true, Description = "Service object")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Service), Description = "Updated service object")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
@@ -147,9 +141,10 @@ public class ServiceRegistration_v1
     [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "The service was not found")]
     public async Task<IActionResult> EditService(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "v1/service-register/{id}")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "v1/config/{config_id}/services/{service_id}")] HttpRequest req,
         FunctionContext context,
-        [FromRoute] string id)
+        string config_id,
+        string service_id)
     {
         var auth = context.Features.Get<JwtAuthFeature>();
         if (auth == null)
@@ -159,14 +154,14 @@ public class ServiceRegistration_v1
             return new ForbiddenResult();
 
         var data = await req.ReadJson<Service>();
-        if (data == null || string.IsNullOrWhiteSpace(id) || data.Id != id)
+        if (data == null || data.Id != service_id)
             return new BadRequestResult();
 
-        string? config = AireEnvironment.PlatformConfiguration;
+        var config = await _storage.RetrieveAsync<PlatformEntity>(config_id, AireConstants.PlatformConfigRowKey);
         if (config == null)
-            throw new Exception("The platform is not configured");
+            return new NotFoundResult();
 
-        var entity = await _storage.RetrieveAsync<ServiceEntity>(config, id);
+        var entity = await _storage.RetrieveAsync<ServiceEntity>(config_id, service_id);
         if (entity == null)
             return new NotFoundResult();
 
@@ -201,16 +196,18 @@ public class ServiceRegistration_v1
         Summary = "Delete a service",
         Description = "Deletes the service registration")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
-    [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Service identifier")]
+    [OpenApiParameter("config_id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
+    [OpenApiParameter("service_id", In = ParameterLocation.Path, Required = true, Description = "Service identifier")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NoContent, Description = "Operation successful")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
-    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "The service was not found")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "The service or configuration was not found")]
     public async Task<IActionResult> DeleteService(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "v1/service-register/{id}")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "v1/config/{config_id}/services/{service_id}")] HttpRequest req,
         FunctionContext context,
-        [FromRoute] string id)
+        string config_id,
+        string service_id)
     {
         var auth = context.Features.Get<JwtAuthFeature>();
         if (auth == null)
@@ -219,14 +216,11 @@ public class ServiceRegistration_v1
         if (!_jwt.CheckAuthorization(auth, AireScopes.DeleteServices))
             return new ForbiddenResult();
 
-        if (string.IsNullOrWhiteSpace(id))
-            return new BadRequestResult();
-
-        string? config = AireEnvironment.PlatformConfiguration;
+        var config = await _storage.RetrieveAsync<PlatformEntity>(config_id, AireConstants.PlatformConfigRowKey);
         if (config == null)
-            throw new Exception("The platform is not configured");
+            return new NotFoundResult();
 
-        var entity = await _storage.RetrieveAsync<ServiceEntity>(config, id);
+        var entity = await _storage.RetrieveAsync<ServiceEntity>(config_id, service_id);
         if (entity == null)
             return new NotFoundResult();
 

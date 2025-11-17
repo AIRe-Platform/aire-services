@@ -1,12 +1,20 @@
 @base_url = http://localhost:7071/api
+@config_id = default
+@service_key = ba388ea7fb3475cc429fb8deeb2bab52
+@user_token = 
+
+### List configs
+GET {{base_url}}/v1/configs HTTP/1.1
+Accept: application/json
+Authorization: Bearer {{user_token}}
 
 ### Get platform config
 
-GET {{base_url}}/v1/config HTTP/1.1
+GET {{base_url}}/v1/config/{{config_id}}/public HTTP/1.1
 Accept: application/json
 
 ### Get internal platform config
 
-GET {{base_url}}/v1/config/internal HTTP/1.1
+GET {{base_url}}/v1/config/{{config_id}}/internal HTTP/1.1
 Accept: application/json
-Aire-Service-Key: 
+Aire-Service-Key: {{service_key}}

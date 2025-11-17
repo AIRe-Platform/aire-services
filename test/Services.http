@@ -1,0 +1,53 @@
+@base=http://localhost:7071/api
+@token=
+@service_id=464399bb-830a-43ff-97b3-844f9bdad1c8
+@config_id = default
+
+
+### List services
+GET {{base}}/v1/config/{{config_id}}/services HTTP/1.1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### Register a service
+POST {{base}}/v1/config/{{config_id}}/services HTTP/1.1
+Authorization: Bearer {{token}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "My Service",
+    "owner": null,
+    "modules": [
+        {
+            "type": "memory",
+            "endpoint": "http://localhost:7073/api",
+            "access": "public",
+            "credentials": null
+        }
+    ]
+}
+
+### Edit a service
+PUT {{base}}/v1/config/{{config_id}}/services/{{service_id}} HTTP/1.1
+Authorization: Bearer {{token}}
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "{{service_id}}",
+    "name": "My Memory Module",
+    "modules": [
+        {
+            "type": "memory",
+            "endpoint": "http://localhost:7073/api",
+            "access": "service",
+            "credentials": null
+        }
+    ]
+}
+
+### Delete (unregister) a service
+DELETE {{base}}/v1/config/{{config_id}}/services/{{service_id}} HTTP/1.1
+Authorization: Bearer {{token}}

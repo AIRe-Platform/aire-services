@@ -19,25 +19,12 @@ namespace Aire.Services.Models
     {
         public string? ConfigData { get; set; }
         public string? InstanceSettings { get; set; }
+        public string? AgentConfig { get; set; }
 
         [IgnoreDataMember]
         public Platform? Platform
         {
-            get
-            {
-                var platform = ConfigData?.JsonToObject<Platform>();
-
-                if (platform?.Modules == null)
-                {
-                    var config = ConfigData?.JsonToObject<PlatformConfiguration>();
-                    platform = config?.Platform;
-                }
-                if (platform is not null)
-                {
-                    platform.Settings = Settings;
-                }
-                return platform;
-            }
+            get => ConfigData?.JsonToObject<Platform>() ?? null;
             set => ConfigData = value.ObjectToJson();
         }
 
@@ -46,6 +33,13 @@ namespace Aire.Services.Models
         {
             get => InstanceSettings?.JsonToObject<InstanceSettings>() ?? _defaultInstanceSettings;
             set => InstanceSettings = value.ObjectToJson();
+        }
+
+        [IgnoreDataMember]
+        public List<AgentConfig> Agents
+        {
+            get => AgentConfig?.JsonToObject<List<AgentConfig>>() ?? [];
+            set => AgentConfig = value.ObjectToJson();
         }
 
         private static readonly InstanceSettings _defaultInstanceSettings = new() { InactivityDuration = 30 };

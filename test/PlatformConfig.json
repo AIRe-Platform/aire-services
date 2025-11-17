@@ -1,0 +1,39 @@
+{
+    "name": "AIRe Development Platform",
+    "modules": {
+        "id": [
+            {
+                "type": "id",
+                "endpoint": "http://localhost:7072/api",
+                "access": "public"
+            }
+        ],
+        "memory": [
+            {
+                "id": "aire.memory.development.main",
+                "type": "memory",
+                "endpoint": "http://localhost:7073/api",
+                "access": "public"
+            },
+            {
+                "id": "aire.memory.development.extra",
+                "type": "memory",
+                "endpoint": "http://localhost:7073/api",
+                "access": "public",
+                "settings": {
+                    "vector_database_name": "dev_extra"
+                }
+            }
+        ],
+        "ai": [
+            {
+                "type": "ai",
+                "endpoint": "http://localhost:7074/api",
+                "access": "public",
+                "settings": {
+                    "personality_prompt": "General rules:\n- Act in a friendly manner, but avoid too emotional language. \n- Focus on neutral and plain, easy to understand language. \n- Keep your answers short and your questions direct and on point.\n- Avoid being overly polite, but still act with respect.\n- Ask only a single question at a time.\n\n"
+                }
+            }
+        ]
+    }
+}
