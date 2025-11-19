@@ -21,6 +21,7 @@ Content-Type: application/json
     "owner": null,
     "modules": [
         {
+            "id": "my_service.memory",
             "type": "memory",
             "endpoint": "http://localhost:7073/api",
             "access": "public",
@@ -40,6 +41,7 @@ Content-Type: application/json
     "name": "My Memory Module",
     "modules": [
         {
+            "id": "my_service.memory",
             "type": "memory",
             "endpoint": "http://localhost:7073/api",
             "access": "service",

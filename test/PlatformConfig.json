@@ -3,6 +3,7 @@
     "modules": {
         "id": [
             {
+                "id": "aire.id.development",
                 "type": "id",
                 "endpoint": "http://localhost:7072/api",
                 "access": "public"
@@ -13,20 +14,15 @@
                 "id": "aire.memory.development.main",
                 "type": "memory",
                 "endpoint": "http://localhost:7073/api",
-                "access": "public"
-            },
-            {
-                "id": "aire.memory.development.extra",
-                "type": "memory",
-                "endpoint": "http://localhost:7073/api",
                 "access": "public",
                 "settings": {
-                    "vector_database_name": "dev_extra"
+                    "vector_database_name": "langchain_python_db_dev"
                 }
             }
         ],
         "ai": [
             {
+                "id": "aire.ai.development",
                 "type": "ai",
                 "endpoint": "http://localhost:7074/api",
                 "access": "public",
