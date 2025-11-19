@@ -142,8 +142,12 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 
     [Function("ListConfigurations_v1")]
     [OpenApiOperation("listConfigurations", ["Configuration"], Summary = "List platform configurations")]
+    [OpenApiSecurity("AireServiceKey", SecuritySchemeType.ApiKey,
+        Name = "Aire-Service-Key",
+        In = OpenApiSecurityLocationType.Header,
+        Description = "Internal platform module service key")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
-    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(List<PlatformConfiguration>), Description = "Platform configuration list")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Dictionary<string, PlatformConfiguration>), Description = "Platform configurations by ID")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
     [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "Configuration error")]
@@ -153,12 +157,14 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
     {
         var auth = context.Features.Get<JwtAuthFeature>();
         if (auth == null)
-            return new UnauthorizedResult();
-
-        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminConfig))
+        {
+            if (!req.IsServiceRequest())
+                return new UnauthorizedResult();
+        }
+        else if (!_jwt.CheckAuthorization(auth, AireScopes.AdminConfig))
             return new ForbiddenResult();
 
-        var results = new List<PlatformConfiguration>();
+        var results = new Dictionary<string, PlatformConfiguration>();
         var entities = await _storage.All<PlatformEntity>();
 
         foreach (var entity in entities)
@@ -174,6 +180,8 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
                 Settings = entity.Settings,
                 Agents = entity.Agents
             };
+
+            results.Add(entity.PartitionKey!, config);
         }
 
         return new OkObjectResult(results);
