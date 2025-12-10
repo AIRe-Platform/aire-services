@@ -80,6 +80,60 @@ public class Settings_v1(IJwtTokenService _jwt, ITableStorageService _storage)
         return new OkObjectResult(instanceSettings);
     }
 
+    [Function("GetModuleSettings_v1")]
+    [OpenApiOperation("getModuleSettings", ["Settings"], Summary = "Get module settings")]
+    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("config_id", Description = "Configuration identifier", Required = true, In = ParameterLocation.Path)]
+    [OpenApiParameter("module_type", Description = "Module type", Required = true, In = ParameterLocation.Path)]
+    [OpenApiParameter("module_id", Description = "Module identifier", Required = true, In = ParameterLocation.Path)]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Dictionary<string, dynamic>), Description = "Module settings object")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration or module not found")]
+    public async Task<IActionResult> GetModuleSettings(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/config/{config_id}/{module_type}/{module_id}/settings")] HttpRequest req,
+        FunctionContext context,
+        string config_id,
+        string module_type,
+        string module_id)
+    {
+        var auth = context.Features.Get<JwtAuthFeature>();
+        if (auth == null)
+            return new UnauthorizedResult();
+
+        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminModuleSettings))
+            return new ForbiddenResult();
+
+        var platform = await _storage.RetrieveAsync<PlatformEntity>(config_id, AireConstants.PlatformConfigRowKey);
+        if (platform == null)
+            return new NotFoundResult();
+
+        if (platform.Platform == null)
+            throw new Exception("Default platform not configured!");
+
+        ModuleType moduleType;
+        switch (module_type.ToLower())
+        {
+            case "id": moduleType = ModuleType.ID; break;
+            case "ai": moduleType = ModuleType.AI; break;
+            case "memory": moduleType = ModuleType.Memory; break;
+            default:
+                return new BadRequestResult();
+        }
+
+        var config = platform.Platform;
+        var modulesByType = config.Modules ?? [];
+        if (!modulesByType.TryGetValue(moduleType, out List<Module>? moduleList))
+            return new NotFoundResult();
+
+        var module = moduleList.FirstOrDefault(x => x.Id == module_id);
+        if (module == null)
+            return new NotFoundResult();
+
+        return new OkObjectResult(module.Settings);
+    }
+
     [Function("EditModuleSettings_v1")]
     [OpenApiOperation("editModuleSettings", ["Settings"], Summary = "Edit module settings")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
@@ -87,7 +141,7 @@ public class Settings_v1(IJwtTokenService _jwt, ITableStorageService _storage)
     [OpenApiParameter("config_id", Description = "Configuration identifier", Required = true, In = ParameterLocation.Path)]
     [OpenApiParameter("module_type", Description = "Module type", Required = true, In = ParameterLocation.Path)]
     [OpenApiParameter("module_id", Description = "Module identifier", Required = true, In = ParameterLocation.Path)]
-    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Dictionary<string, dynamic>), Description = "Edited instance settings object")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Dictionary<string, dynamic>), Description = "Edited module settings object")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid authorization")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest, Description = "Invalid request")]
