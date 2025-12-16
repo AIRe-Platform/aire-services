@@ -100,7 +100,7 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
         Description = "User token")]
     [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(PlatformConfiguration), Description = "Platform configuration")]
-    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid token or service key")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
     [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "Configuration error")]
@@ -142,15 +142,12 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
 
     [Function("ListConfigurations_v1")]
     [OpenApiOperation("listConfigurations", ["Configuration"], Summary = "List platform configurations")]
-    [OpenApiSecurity("AireServiceKey", SecuritySchemeType.ApiKey,
-        Name = "Aire-Service-Key",
-        In = OpenApiSecurityLocationType.Header,
-        Description = "Internal platform module service key")]
+    [OpenApiSecurity("AireServiceKey", SecuritySchemeType.ApiKey, Name = "Aire-Service-Key", In = OpenApiSecurityLocationType.Header, Description = "Internal platform module service key")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
     [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Dictionary<string, PlatformConfiguration>), Description = "Platform configurations by ID")]
-    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid token or service key")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
-    [OpenApiResponseWithoutBody(HttpStatusCode.InternalServerError, Description = "Configuration error")]
     public async Task<IActionResult> ListConfigurations(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/configs")] HttpRequest req,
         FunctionContext context)
@@ -187,13 +184,58 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
         return new OkObjectResult(results);
     }
 
+    [Function("CreateConfiguration_v1")]
+    [OpenApiOperation("createConfiguration", ["Configuration"], Summary = "Create platform configuration")]
+    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
+    [OpenApiRequestBody("application/json", typeof(Platform), Required = true, Description = "Platform configuration")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Platform), Description = "Platform configuration")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid token")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.UnprocessableEntity, Description = "Failed to parse request")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Conflict, Description = "Already exists")]
+    public async Task<IActionResult> CreateConfiguration(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/config/{id}")] HttpRequest req,
+        FunctionContext context,
+        string id)
+    {
+        var auth = context.Features.Get<JwtAuthFeature>();
+        if (auth == null)
+            return new UnauthorizedResult();
+
+        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminConfig))
+            return new ForbiddenResult();
+
+        var config = await req.ReadJson<Platform>();
+        if (config == null)
+            return new UnprocessableEntityResult();
+
+        var entity = await _storage.RetrieveAsync<PlatformEntity>(id, AireConstants.PlatformConfigRowKey);
+        if (entity != null)
+            return new ConflictResult();
+
+        entity = new PlatformEntity
+        {
+            PartitionKey = id,
+            RowKey = AireConstants.PlatformConfigRowKey,
+            Platform = config,
+        };
+
+        bool updated = await _storage.UpsertAsync(entity);
+        if (!updated)
+            throw new Exception("Failed to create platform configuration");
+
+        return new OkObjectResult(entity.Platform);
+    }
+
     [Function("EditConfiguration_v1")]
     [OpenApiOperation("editConfiguration", ["Configuration"], Summary = "Edit platform configuration")]
     [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
     [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
     [OpenApiRequestBody("application/json", typeof(Platform), Required = true, Description = "Platform configuration")]
-    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Platform), Description = "Platform configuration list")]
-    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid service key")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(Platform), Description = "Updated platform configuration")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid token")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     [OpenApiResponseWithoutBody(HttpStatusCode.UnprocessableEntity, Description = "Failed to parse request")]
     [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
     public async Task<IActionResult> EditConfiguration(
@@ -219,8 +261,39 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
         entity.Platform = config;
         bool updated = await _storage.UpsertAsync(entity);
         if (!updated)
-            throw new Exception("Failed to update module settings");
+            throw new Exception("Failed to update platform configuration");
 
         return new OkObjectResult(entity.Platform);
+    }
+
+    [Function("DeleteConfiguration_v1")]
+    [OpenApiOperation("deleteConfiguration", ["Configuration"], Summary = "Delete platform configuration")]
+    [OpenApiSecurity("bearer_auth", SecuritySchemeType.Http, Scheme = OpenApiSecuritySchemeType.Bearer, BearerFormat = "JWT", Description = "User token")]
+    [OpenApiParameter("id", In = ParameterLocation.Path, Required = true, Description = "Configuration identifier")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NoContent, Description = "Configuration deleted")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Missing or invalid token")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
+    [OpenApiResponseWithoutBody(HttpStatusCode.NotFound, Description = "Configuration not found")]
+    public async Task<IActionResult> DeleteConfiguration(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "v1/config/{id}")] HttpRequest req,
+        FunctionContext context,
+        string id)
+    {
+        var auth = context.Features.Get<JwtAuthFeature>();
+        if (auth == null)
+            return new UnauthorizedResult();
+
+        if (!_jwt.CheckAuthorization(auth, AireScopes.AdminConfig))
+            return new ForbiddenResult();
+
+        var entity = await _storage.RetrieveAsync<PlatformEntity>(id, AireConstants.PlatformConfigRowKey);
+        if (entity == null)
+            return new NotFoundResult();
+
+        bool updated = await _storage.DeleteAsync(entity);
+        if (!updated)
+            throw new Exception("Failed to delete platform configuration");
+
+        return new NoContentResult();
     }
 }
