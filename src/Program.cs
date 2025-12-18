@@ -18,6 +18,7 @@ using Aire.Services;
 using Aire.Sdk.Auth;
 using Aire.Sdk.Auth.Extensions;
 using Aire.Services.Backup;
+using Aire.Sdk.Platform;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(worker =>
@@ -36,7 +37,7 @@ var host = new HostBuilder()
 
         services.AddAzureClients(builder =>
         {
-            builder.AddTableServiceClient(AireEnvironment.StorageConnectionString)
+            builder.AddTableServiceClient(AireServicesEnvironment.StorageConnectionString)
                 .ConfigureOptions(options =>
                 {
                     options.Diagnostics.IsLoggingEnabled = false;
@@ -61,7 +62,7 @@ var host = new HostBuilder()
                     Description = "This is the reference implementation of the AIRe Platform Services module."
                 },
                 Servers = [
-                    new OpenApiServer { Url = AireEnvironment.OpenApiHost ?? "/api" }
+                    new OpenApiServer { Url = AireServicesEnvironment.OpenApiHost ?? "/api" }
                 ],
                 OpenApiVersion = OpenApiVersionType.V3,
                 IncludeRequestingHostName = false,
@@ -76,14 +77,14 @@ var host = new HostBuilder()
 
         services.Configure<TableBackupOptions>(o =>
         {
-            o.Tables = AireEnvironment.BackupTables?
+            o.Tables = AireServicesEnvironment.BackupTables?
                 .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            o.SourceStorageConnectionString = AireEnvironment.StorageConnectionString;
-            o.DestinationStorageConnectionString = AireEnvironment.BackupStorageConnectionString;
+            o.SourceStorageConnectionString = AireServicesEnvironment.StorageConnectionString;
+            o.DestinationStorageConnectionString = AireServicesEnvironment.BackupStorageConnectionString;
 
-            if (AireEnvironment.BackupExpiryDays != null)
-                o.CleanUpOlderThan = TimeSpan.FromDays(int.Parse(AireEnvironment.BackupExpiryDays));
+            if (AireServicesEnvironment.BackupExpiryDays != null)
+                o.CleanUpOlderThan = TimeSpan.FromDays(int.Parse(AireServicesEnvironment.BackupExpiryDays));
         });
     })
     .Build();

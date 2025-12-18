@@ -5,11 +5,9 @@
 
 namespace Aire.Services
 {
-    public static class AireEnvironment
+    public static class AireServicesEnvironment
     {
         public static string? StorageConnectionString => Environment.GetEnvironmentVariable("StorageConnectionString");
-        public static string? TokenSigningKey => Environment.GetEnvironmentVariable("TOKEN_SIGNING_KEY");
-        public static string? TokenEncryptionKey => Environment.GetEnvironmentVariable("TOKEN_ENCRYPTION_KEY");
         public static string? OpenApiHost => Environment.GetEnvironmentVariable("OpenApi__HostNames");
         public static string? BackupExpiryDays => Environment.GetEnvironmentVariable("BackupExpiryDays");
         public static string? BackupStorageConnectionString => Environment.GetEnvironmentVariable("BackupStorageConnectionString");
