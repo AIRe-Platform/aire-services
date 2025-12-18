@@ -3,15 +3,18 @@
     "modules": {
         "id": [
             {
-                "id": "aire.id.development",
+                "id": "aire.development.id",
                 "type": "id",
                 "endpoint": "http://localhost:7072/api",
-                "access": "public"
+                "access": "public",
+                "settings": {
+                    "email_domain_whitelist": "jamk.fi,goodlife.technology"
+                }
             }
         ],
         "memory": [
             {
-                "id": "aire.memory.development.main",
+                "id": "aire.development.memory.main",
                 "type": "memory",
                 "endpoint": "http://localhost:7073/api",
                 "access": "public",
@@ -22,7 +25,7 @@
         ],
         "ai": [
             {
-                "id": "aire.ai.development",
+                "id": "aire.development.ai",
                 "type": "ai",
                 "endpoint": "http://localhost:7074/api",
                 "access": "public",
