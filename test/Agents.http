@@ -1,0 +1,18 @@
+@base=http://localhost:7071/api
+@token=
+@service_key = ba388ea7fb3475cc429fb8deeb2bab52
+@config_id = default
+
+### List agents
+GET {{base}}/v1/config/{{config_id}}/agents HTTP/1.1
+Aire-Service-Key: {{service_key}}
+Accept: application/json
+
+
+### Edit agents
+PUT {{base}}/v1/config/{{config_id}}/agents HTTP/1.1
+Authorization: Bearer {{token}}
+Accept: application/json
+Content-Type: application/json
+
+< ./AgentConfig.json
