@@ -8,46 +8,40 @@ using Aire.Sdk.Azure;
 using Aire.Sdk.Helpers;
 using Aire.Sdk.Models.Platform;
 
-namespace Aire.Services.Models
+namespace Aire.Services.Models;
+
+/// <summary>
+/// Configuration name: PartitionKey
+/// Configuration type: RowKey (default: "platform")
+/// </summary>
+[EntityTable("Platform")]
+public class PlatformEntity : BaseTableEntity
 {
-    /// <summary>
-    /// Configuration name: PartitionKey
-    /// Configuration type: RowKey (default: "platform")
-    /// </summary>
-    [EntityTable("Platform")]
-    public class PlatformEntity : BaseTableEntity
+    public string? ConfigData { get; set; }
+    public string? InstanceSettings { get; set; }
+    public string? AgentConfig { get; set; }
+
+    [IgnoreDataMember]
+    public Platform? Platform
     {
-        public string? ConfigData { get; set; }
-        public string? InstanceSettings { get; set; }
-
-        [IgnoreDataMember]
-        public Platform? Platform
-        {
-            get
-            {
-                var platform = ConfigData?.JsonToObject<Platform>();
-
-                if (platform?.Modules == null)
-                {
-                    var config = ConfigData?.JsonToObject<PlatformConfiguration>();
-                    platform = config?.Platform;
-                }
-                if (platform is not null)
-                {
-                    platform.Settings = Settings;
-                }
-                return platform;
-            }
-            set => ConfigData = value.ObjectToJson();
-        }
-
-        [IgnoreDataMember]
-        public InstanceSettings Settings
-        {
-            get => InstanceSettings?.JsonToObject<InstanceSettings>() ?? _defaultInstanceSettings;
-            set => InstanceSettings = value.ObjectToJson();
-        }
-
-        private static readonly InstanceSettings _defaultInstanceSettings = new() { InactivityDuration = 30 };
+        get => ConfigData?.JsonToObject<Platform>() ?? null;
+        set => ConfigData = value.ObjectToJson();
     }
+
+    [IgnoreDataMember]
+    public InstanceSettings Settings
+    {
+        get => InstanceSettings?.JsonToObject<InstanceSettings>() ?? _defaultInstanceSettings;
+        set => InstanceSettings = value.ObjectToJson();
+    }
+
+    [IgnoreDataMember]
+    public List<AgentConfig> Agents
+    {
+        get => AgentConfig?.JsonToObject<List<AgentConfig>>() ?? [];
+        set => AgentConfig = value.ObjectToJson();
+    }
+
+    private static readonly InstanceSettings _defaultInstanceSettings = new() { InactivityDuration = 30 };
 }
+
