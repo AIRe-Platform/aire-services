@@ -35,7 +35,7 @@ public class Platform_v1(IJwtTokenService _jwt, ITableStorageService _storage)
     [OpenApiResponseWithoutBody(HttpStatusCode.Unauthorized, Description = "Login required")]
     [OpenApiResponseWithoutBody(HttpStatusCode.Forbidden, Description = "Access denied")]
     public async Task<IActionResult> ListPlatforms(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/configs/platforms")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/platforms")] HttpRequest req,
         FunctionContext context)
     {
         var results = new Dictionary<string, PlatformInfo>();
