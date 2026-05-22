@@ -36,7 +36,7 @@ public class Config_v1(IJwtTokenService _jwt, ITableStorageService _storage)
             return new NotFoundResult();
 
         if (entity.Platform == null)
-            throw new Exception("Default platform not configured!");
+            throw new Exception("Platform not configured!");
 
         var serviceQuery = await _storage.QueryAsync<ServiceEntity>(x => x.PartitionKey == entity.PartitionKey);
         var serviceList = await serviceQuery.ToListAsync();
